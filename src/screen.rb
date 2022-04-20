@@ -20,7 +20,27 @@ class Screen
         end
       end
     end
+
+    @overlays = Array.new(COLS + 1) do
+      Array.new(ROWS + 1)
+    end
+    (0..COLS).each do |i|
+      (0..ROWS).each do |j|
+        tl = i == 0 || j == 0 ? '' : @tiles[i - 1][j - 1]
+        tr = i == COLS || j == 0 ? '' : @tiles[i][j - 1]
+        bl = i == 0 || j == ROWS ? '' : @tiles[i - 1][j]
+        br = i == COLS || j == ROWS ? '' : @tiles[i][j]
+        top_left = i == 0 && j == 0 || i == 0 && tr == '\\' || j == 0 && bl == '\\' || /[\/\\]/ =~ tl
+        top_right = i == COLS && j == 0 || i == COLS && tl == '\\' || j == 0 && br == '\\' || /[\/\\]/ =~ tr
+        bottom_left = i == 0 && j == ROWS || i == 0 && br == '\\' || j == ROWS && tl == '\\' || /[\/\\]/ =~ bl
+        bottom_right = i == COLS && j == ROWS || i == COLS && bl == '\\' || j == ROWS && tr == '\\' || /[\/\\]/ =~ br
+        @overlays[i][j] = top_left && top_right && bottom_left && bottom_right
+      end
+    end
+
     @tile_size = Game.scale * BASE_TILE_SIZE
+    @margin = Vector.new((Game.window_size.x - @tile_size * COLS) / 2,
+                         (Game.window_size.y - @tile_size * ROWS) / 2)
   end
 
   def get_tile(i, j)
@@ -55,20 +75,27 @@ class Screen
   end
 
   def draw
-    (0...COLS).each do |i|
-      (0...ROWS).each do |j|
+    (0..COLS).each do |i|
+      (0..ROWS).each do |j|
+        if @overlays[i][j]
+          @tileset[OVERLAY_TILE_INDEX].draw(i * @tile_size + @margin.x - @tile_size / 2,
+                                            j * @tile_size + @margin.y - @tile_size / 2,
+                                            1, Game.scale, Game.scale)
+        end
+
+        next if i == COLS || j == ROWS
         index = get_tile(i, j)
-        @tileset[index].draw(i * @tile_size, j * @tile_size, 0, Game.scale, Game.scale)
+        @tileset[index].draw(i * @tile_size + @margin.x, j * @tile_size + @margin.y, 0, Game.scale, Game.scale)
       end
     end
-    (0...COLS - 1).each do |i|
-      (0...ROWS - 1).each do |j|
-        if @tiles[i][j] == '/' && @tiles[i][j + 1] == '/' && @tiles[i + 1][j] == '/' && @tiles[i + 1][j + 1] == '/'
-          @tileset[OVERLAY_TILE_INDEX].draw(i * @tile_size + @tile_size / 2,
-                                            j * @tile_size + @tile_size / 2,
-                                            0, Game.scale, Game.scale)
-        end
-      end
+
+    if @margin.x > 0.01
+      Gosu.draw_rect(0, 0, @margin.x, Game.window_size.y, 0xff000000, 2)
+      Gosu.draw_rect(Game.window_size.x - @margin.x, 0, @margin.x, Game.window_size.y, 0xff000000, 2)
+    end
+    if @margin.y > 0.01
+      Gosu.draw_rect(0, 0, Game.window_size.x, @margin.y, 0xff000000, 2)
+      Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 2)
     end
   end
 end
