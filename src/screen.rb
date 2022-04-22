@@ -1,4 +1,5 @@
 require 'minigl'
+require_relative 'man'
 
 include MiniGL
 
@@ -41,6 +42,8 @@ class Screen
     @tile_size = Game.scale * BASE_TILE_SIZE
     @margin = Vector.new((Game.window_size.x - @tile_size * COLS) / 2,
                          (Game.window_size.y - @tile_size * ROWS) / 2)
+
+    @man = Man.new(@margin.x, @margin.y)
   end
 
   def get_tile(i, j)
@@ -71,7 +74,7 @@ class Screen
   end
 
   def update
-
+    @man.update
   end
 
   def draw
@@ -88,6 +91,8 @@ class Screen
         @tileset[index].draw(i * @tile_size + @margin.x, j * @tile_size + @margin.y, 0, Game.scale, Game.scale)
       end
     end
+
+    @man.draw
 
     if @margin.x > 0.01
       Gosu.draw_rect(0, 0, @margin.x, Game.window_size.y, 0xff000000, 2)
