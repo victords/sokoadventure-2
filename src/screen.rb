@@ -6,7 +6,6 @@ include MiniGL
 class Screen
   COLS = 24
   ROWS = 13
-  BASE_TILE_SIZE = 160
   OVERLAY_TILE_INDEX = 7
 
   def initialize
@@ -96,11 +95,11 @@ class Screen
 
     if @margin.x > 0.01
       Gosu.draw_rect(0, 0, @margin.x, Game.window_size.y, 0xff000000, 2)
-      Gosu.draw_rect(Game.window_size.x - @margin.x, 0, @margin.x, Game.window_size.y, 0xff000000, 2)
+      Gosu.draw_rect(Game.window_size.x - @margin.x, 0, @margin.x, Game.window_size.y, 0xff000000, 10)
     end
     if @margin.y > 0.01
       Gosu.draw_rect(0, 0, Game.window_size.x, @margin.y, 0xff000000, 2)
-      Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 2)
+      Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 10)
     end
   end
 end
