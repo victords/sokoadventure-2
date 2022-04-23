@@ -1,16 +1,12 @@
-require 'minigl'
-require_relative 'constants'
+require_relative 'game_object'
 require_relative 'particles'
 
-class Man < MiniGL::GameObject
-  attr_reader :dir, :moving
+class Man < GameObject
+  attr_reader :dir
 
-  def initialize(x, y)
-    super(x, y, Game.scale * BASE_TILE_SIZE, Game.scale * BASE_TILE_SIZE, :sprite_man, Vector.new(0, -60 * Game.scale), 8, 3)
-
-    @speed = 10 * Game.scale
+  def initialize(x, y, col, row)
+    super(x, y, col, row, :sprite_man, Vector.new(0, -50), 8, 3)
     @dir = 2
-    @moving = 0
     set_animation(animation_base)
 
     @dust = Particles.new(type: :dust,
@@ -31,39 +27,32 @@ class Man < MiniGL::GameObject
     end
   end
 
-  def start_move(dir, dest)
-    return if @moving == 1
+  def can_move?(col, row, objects)
+    return false if col < 0 || row < 0 || col >= SCREEN_COLS || row >= SCREEN_ROWS
 
-    prev_dir = @dir
-    @dir = dir
-    @dest = dest
-    @dust.start if @moving == 0
-    @moving = 1
-    set_animation(animation_base) if dir != prev_dir
+    objects[col][row].empty?
   end
 
-  def move
-    x, y = case @dir
-           when 0 then [0, -@speed]
-           when 1 then [@speed, 0]
-           when 2 then [0, @speed]
-           else        [-@speed, 0]
-           end
-    @x += x
-    @y += y
-    if @dir == 0 && @y <= @dest.y ||
-      @dir == 1 && @x >= @dest.x ||
-      @dir == 2 && @y >= @dest.y ||
-      @dir == 3 && @x <= @dest.x
-      @x = @dest.x
-      @y = @dest.y
-      @moving = 2
+  def check_move(dir, objects)
+    return if @moving == 1
+
+    tile_size = BASE_TILE_SIZE * Game.scale
+    dest, col, row = case dir
+                     when 0 then [Vector.new(@x, @y - tile_size), @col, @row - 1]
+                     when 1 then [Vector.new(@x + tile_size, @y), @col + 1, @row]
+                     when 2 then [Vector.new(@x, @y + tile_size), @col, @row + 1]
+                     else        [Vector.new(@x - tile_size, @y), @col - 1, @row]
+                     end
+
+    if can_move?(col, row, objects)
+      start_move(dir, dest)
+    else
+      @dir = dir
+      set_animation(animation_base)
     end
   end
 
-  def update
-    tile_size = BASE_TILE_SIZE * Game.scale
-
+  def update(objects)
     base = animation_base
     if @moving == 1
       animate([base, base + 4, base + 5, base, base + 6, base + 7], 7)
@@ -76,21 +65,21 @@ class Man < MiniGL::GameObject
     @dust.update
 
     if KB.key_down?(Gosu::KB_UP)
-      start_move(0, Vector.new(@x, @y - tile_size))
+      check_move(0, objects)
     elsif KB.key_down?(Gosu::KB_RIGHT)
-      start_move(1, Vector.new(@x + tile_size, @y))
+      check_move(1, objects)
     elsif KB.key_down?(Gosu::KB_DOWN)
-      start_move(2, Vector.new(@x, @y + tile_size))
+      check_move(2, objects)
     elsif KB.key_down?(Gosu::KB_LEFT)
-      start_move(3, Vector.new(@x - tile_size, @y))
+      check_move(3, objects)
     elsif @moving == 2
       @moving = 0
       @dust.stop
     end
   end
 
-  def draw
-    @dust.draw(2)
-    super(nil, Game.scale, Game.scale, 255, 0xffffff, nil, @dir == 3 ? :horiz : nil, 2)
+  def draw(z_index)
+    @dust.draw(z_index)
+    super(z_index, @dir == 3 ? :horiz : nil)
   end
 end
