@@ -18,7 +18,7 @@ class Particles
     @type = type
     @sprite_cols, @sprite_rows, @indices =
       case type
-      when :dust
+      when :dust, :drop
         [1, 1, [0]]
       end
     @x = x
@@ -35,8 +35,8 @@ class Particles
     @elements.reverse_each do |e|
       e.update
       if @options[:move]
-        e.x += @options[:move].x.to_f / @options[:duration]
-        e.y += @options[:move].y.to_f / @options[:duration]
+        e.x += @options[:move].x.to_f / @options[:duration] * Game.scale
+        e.y += @options[:move].y.to_f / @options[:duration] * Game.scale
       end
       @elements.delete(e) if e.dead
     end
@@ -45,8 +45,8 @@ class Particles
 
     @timer += 1
     if @timer >= @options[:emission_interval]
-      x = @options[:area] ? @x + rand * @options[:area].x : @x + @options[:spread] * (rand - 0.5)
-      y = @options[:area] ? @y + rand * @options[:area].y : @y + @options[:spread] * (rand - 0.5)
+      x = @options[:area] ? @x + rand * @options[:area].x * Game.scale : @x + @options[:spread] * (rand - 0.5) * Game.scale
+      y = @options[:area] ? @y + rand * @options[:area].y * Game.scale : @y + @options[:spread] * (rand - 0.5) * Game.scale
       @elements << Effect.new(x, y, "fx_#{@type}", @sprite_cols, @sprite_rows, @options[:duration] / @indices.size, @indices)
       @timer = 0
     end
@@ -69,13 +69,13 @@ class Particles
   def draw(z_index = 0)
     @elements.each do |e|
       alpha = (Utils.alternating_rate(e.elapsed_time, @options[:duration]) * 255).round
-      scale = @options[:grow] ? e.elapsed_time.to_f / @options[:duration] * @options[:grow] : 1
+      scale = @options[:grow] ? @options[:grow].min + e.elapsed_time.to_f / @options[:duration] * (@options[:grow].max - @options[:grow].min) : 1
       scale *= Game.scale
       prev_x = e.x
       prev_y = e.y
       e.x -= e.img[0].width * scale / 2
       e.y -= e.img[0].height * scale / 2
-      e.draw(nil, scale, scale, alpha, @options[:color], nil, nil, z_index)
+      e.draw(nil, scale, scale, alpha, @options[:color], nil, @options[:flip], z_index)
       e.x = prev_x
       e.y = prev_y
     end
