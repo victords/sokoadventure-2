@@ -73,6 +73,8 @@ class Man < GameObject
 
     blocked = false
     objects[col][row].each do |obj|
+      break blocked = true if obj.is_a?(Wall)
+
       if obj.is_a?(Box)
         start_push(dir)
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
@@ -104,10 +106,6 @@ class Man < GameObject
       animate(indices, 7)
       move
       @dust.move(@x + @w / 2, @y + @h + @img_gap.y)
-      if @pushing
-        @sweat_left.move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
-        @sweat_right.move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
-      end
     elsif @pushing
       animate([base + 8, base + 9], 7)
     else
@@ -117,6 +115,10 @@ class Man < GameObject
     @dust.update
     @sweat_left.update
     @sweat_right.update
+    if @pushing
+      @sweat_left.move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
+      @sweat_right.move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
+    end
 
     @pushing = false unless @moving == 1
     if KB.key_down?(Gosu::KB_UP)
