@@ -5,7 +5,7 @@ require_relative 'screen'
 
 class Game
   class << self
-    attr_reader :window_size, :scale
+    attr_reader :window_size, :scale, :tile_size
 
     def initialize
       os = RbConfig::CONFIG['host_os']
@@ -16,6 +16,7 @@ class Game
              end
       @window_size = Vector.new(w, h)
       @scale = w.to_f / REF_SCREEN_WIDTH
+      @tile_size = @scale * BASE_TILE_SIZE
     end
 
     def start

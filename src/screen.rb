@@ -37,9 +37,8 @@ class Screen
       end
     end
 
-    @tile_size = Game.scale * BASE_TILE_SIZE
-    @margin = Vector.new((Game.window_size.x - @tile_size * SCREEN_COLS) / 2,
-                         (Game.window_size.y - @tile_size * SCREEN_ROWS) / 2)
+    @margin = Vector.new((Game.window_size.x - Game.tile_size * SCREEN_COLS) / 2,
+                         (Game.window_size.y - Game.tile_size * SCREEN_ROWS) / 2)
 
     @man = Man.new(@margin.x, @margin.y, 0, 0)
     @objects = Array.new(SCREEN_COLS) do
@@ -47,7 +46,8 @@ class Screen
         []
       end
     end
-    @objects[2][1] << Box.new(@margin.x + 2 * @tile_size, @margin.y + @tile_size, 2, 1)
+    @objects[2][1] << Box.new(@margin.x + 2 * Game.tile_size, @margin.y + 1 * Game.tile_size, 2, 1)
+    @objects[4][6] << Box.new(@margin.x + 4 * Game.tile_size, @margin.y + 6 * Game.tile_size, 4, 6)
   end
 
   def get_tile(i, j)
@@ -79,29 +79,30 @@ class Screen
 
   def update
     @man.update(@objects)
+    @objects.flatten.each(&:update)
   end
 
   def draw
     (0..SCREEN_COLS).each do |i|
       (0..SCREEN_ROWS).each do |j|
         if @overlays[i][j]
-          @tileset[OVERLAY_TILE_INDEX].draw(i * @tile_size + @margin.x - @tile_size / 2,
-                                            j * @tile_size + @margin.y - @tile_size / 2,
+          @tileset[OVERLAY_TILE_INDEX].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
+                                            j * Game.tile_size + @margin.y - Game.tile_size / 2,
                                             1, Game.scale, Game.scale)
         end
 
         next if i == SCREEN_COLS || j == SCREEN_ROWS
         index = get_tile(i, j)
-        @tileset[index].draw(i * @tile_size + @margin.x, j * @tile_size + @margin.y, 0, Game.scale, Game.scale)
+        @tileset[index].draw(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, 0, Game.scale, Game.scale)
         if (i + j) % 2 == 0
-          Gosu.draw_rect(i * @tile_size + @margin.x, j * @tile_size + @margin.y, @tile_size, @tile_size, 0x08000000, 2)
+          Gosu.draw_rect(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, Game.tile_size, Game.tile_size, 0x08000000, 2)
         end
       end
     end
 
-    @man.draw(2 + (@man.y - @margin.y) / @tile_size)
+    @man.draw(2 + (@man.y - @margin.y) / Game.tile_size)
     @objects.flatten.each do |obj|
-      obj.draw(2 + (obj.y - @margin.y) / @tile_size)
+      obj.draw(2 + (obj.y - @margin.y) / Game.tile_size)
     end
 
     if @margin.x > 0.01

@@ -5,7 +5,7 @@ class GameObject < MiniGL::GameObject
   attr_reader :col, :row, :moving
 
   def initialize(x, y, col, row, img, img_gap, sprite_cols = nil, sprite_rows = nil)
-    super(x, y, Game.scale * BASE_TILE_SIZE, Game.scale * BASE_TILE_SIZE, img, img_gap * Game.scale, sprite_cols, sprite_rows)
+    super(x, y, Game.tile_size, Game.tile_size, img, img_gap * Game.scale, sprite_cols, sprite_rows)
     @col = col
     @row = row
     @moving = 0
@@ -26,12 +26,9 @@ class GameObject < MiniGL::GameObject
       @col -= 1
     end
 
-    prev_dir = @dir
     @dir = dir
     @dest = dest
-    @dust.start if @moving == 0
     @moving = 1
-    set_animation(animation_base) if dir != prev_dir
   end
 
   def move
@@ -50,6 +47,14 @@ class GameObject < MiniGL::GameObject
       @x = @dest.x
       @y = @dest.y
       @moving = 2
+    end
+  end
+
+  def update
+    if @moving == 1
+      move
+    elsif @moving == 2
+      @moving = 0
     end
   end
 

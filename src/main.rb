@@ -7,7 +7,7 @@ class Window < GameWindow
   attr_reader :global_scale
 
   def initialize
-    super(Game.window_size.x, Game.window_size.y, false)
+    super(Game.window_size.x, Game.window_size.y, true)
     self.caption = 'SokoAdventure 2'
     Res.prefix = File.expand_path(__FILE__).split('/')[0..-3].join('/') + '/data'
 

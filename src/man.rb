@@ -27,25 +27,43 @@ class Man < GameObject
     end
   end
 
-  def can_move?(col, row, objects)
+  def can_move?(dir, col, row, objects)
     return false if col < 0 || row < 0 || col >= SCREEN_COLS || row >= SCREEN_ROWS
+    return true if objects[col][row].empty?
 
-    objects[col][row].empty?
+    next_col = @col + 2 * (col - @col)
+    next_row = @row + 2 * (row - @row)
+    objects[col][row].each do |obj|
+      if obj.is_a?(Box)
+        return false if next_col < 0 || next_row < 0 || next_col >= SCREEN_COLS || next_row >= SCREEN_ROWS
+        if objects[next_col][next_row].empty?
+          objects[next_col][next_row] << obj
+          objects[col][row].delete(obj)
+          obj.start_move(dir, Vector.new(obj.x + (col - @col) * Game.tile_size,
+                                         obj.y + (row - @row) * Game.tile_size))
+          return true
+        end
+      end
+    end
+
+    false
   end
 
   def check_move(dir, objects)
     return if @moving == 1
 
-    tile_size = BASE_TILE_SIZE * Game.scale
     dest, col, row = case dir
-                     when 0 then [Vector.new(@x, @y - tile_size), @col, @row - 1]
-                     when 1 then [Vector.new(@x + tile_size, @y), @col + 1, @row]
-                     when 2 then [Vector.new(@x, @y + tile_size), @col, @row + 1]
-                     else        [Vector.new(@x - tile_size, @y), @col - 1, @row]
+                     when 0 then [Vector.new(@x, @y - Game.tile_size), @col, @row - 1]
+                     when 1 then [Vector.new(@x + Game.tile_size, @y), @col + 1, @row]
+                     when 2 then [Vector.new(@x, @y + Game.tile_size), @col, @row + 1]
+                     else        [Vector.new(@x - Game.tile_size, @y), @col - 1, @row]
                      end
 
-    if can_move?(col, row, objects)
+    if can_move?(dir, col, row, objects)
+      @dust.start if @moving == 0
+      prev_dir = @dir
       start_move(dir, dest)
+      set_animation(animation_base) if dir != prev_dir
     else
       @dir = dir
       set_animation(animation_base)
