@@ -6,7 +6,8 @@ require_relative 'wall'
 include MiniGL
 
 class Screen
-  OVERLAY_TILE_INDEX = 7
+  OVERLAY_HOLE_INDEX = 6
+  OVERLAY_PATH_INDEX = 7
 
   def initialize
     @tileset = Res.tileset('1', BASE_TILE_SIZE, BASE_TILE_SIZE)
@@ -26,15 +27,17 @@ class Screen
     end
     (0..SCREEN_COLS).each do |i|
       (0..SCREEN_ROWS).each do |j|
-        tl = i == 0 || j == 0 ? '' : @tiles[i - 1][j - 1]
-        tr = i == SCREEN_COLS || j == 0 ? '' : @tiles[i][j - 1]
-        bl = i == 0 || j == SCREEN_ROWS ? '' : @tiles[i - 1][j]
-        br = i == SCREEN_COLS || j == SCREEN_ROWS ? '' : @tiles[i][j]
-        top_left = i == 0 && j == 0 || i == 0 && tr == '\\' || j == 0 && bl == '\\' || /[\/\\]/ =~ tl
-        top_right = i == SCREEN_COLS && j == 0 || i == SCREEN_COLS && tl == '\\' || j == 0 && br == '\\' || /[\/\\]/ =~ tr
-        bottom_left = i == 0 && j == SCREEN_ROWS || i == 0 && br == '\\' || j == SCREEN_ROWS && tl == '\\' || /[\/\\]/ =~ bl
-        bottom_right = i == SCREEN_COLS && j == SCREEN_ROWS || i == SCREEN_COLS && bl == '\\' || j == SCREEN_ROWS && tr == '\\' || /[\/\\]/ =~ br
-        @overlays[i][j] = top_left && top_right && bottom_left && bottom_right
+        tl = i == 0 || j == 0 ? nil : @tiles[i - 1][j - 1]
+        tr = i == SCREEN_COLS || j == 0 ? nil : @tiles[i][j - 1]
+        bl = i == 0 || j == SCREEN_ROWS ? nil : @tiles[i - 1][j]
+        br = i == SCREEN_COLS || j == SCREEN_ROWS ? nil : @tiles[i][j]
+        next if [tl, tr, bl, br].compact.map(&:downcase).uniq.size > 1
+
+        top_left = i == 0 && j == 0 || i == 0 && /[PH]/ =~ tr || j == 0 && /[PH]/ =~ bl || /[pPhH]/ =~ tl
+        top_right = i == SCREEN_COLS && j == 0 || i == SCREEN_COLS && /[PH]/ =~ tl || j == 0 && /[PH]/ =~ br || /[pPhH]/ =~ tr
+        bottom_left = i == 0 && j == SCREEN_ROWS || i == 0 && /[PH]/ =~ br || j == SCREEN_ROWS && /[PH]/ =~ tl || /[pPhH]/ =~ bl
+        bottom_right = i == SCREEN_COLS && j == SCREEN_ROWS || i == SCREEN_COLS && /[PH]/ =~ bl || j == SCREEN_ROWS && /[PH]/ =~ tr || /[pPhH]/ =~ br
+        @overlays[i][j] = top_left && top_right && bottom_left && bottom_right && (tl || tr || bl || br)
       end
     end
 
@@ -64,28 +67,47 @@ class Screen
   def get_tile(i, j)
     return 0 if @tiles[i][j] == '.'
 
-    edge = @tiles[i][j] == '\\'
-    up = j > 0 && /[\/\\]/ =~ @tiles[i][j - 1] || j == 0 && edge
-    rt = i < SCREEN_COLS - 1 && /[\/\\]/ =~ @tiles[i + 1][j] || i == SCREEN_COLS - 1 && edge
-    dn = j < SCREEN_ROWS - 1 && /[\/\\]/ =~ @tiles[i][j + 1] || j == SCREEN_ROWS - 1 && edge
-    lf = i > 0 && /[\/\\]/ =~ @tiles[i - 1][j] || i == 0 && edge
+    hole = /[hH]/ =~ @tiles[i][j]
+    edge = /[PH]/ =~ @tiles[i][j]
+    match = hole ? /[hH]/ : /[pP]/
+    up = j > 0 && match =~ @tiles[i][j - 1] || j == 0 && edge
+    rt = i < SCREEN_COLS - 1 && match =~ @tiles[i + 1][j] || i == SCREEN_COLS - 1 && edge
+    dn = j < SCREEN_ROWS - 1 && match =~ @tiles[i][j + 1] || j == SCREEN_ROWS - 1 && edge
+    lf = i > 0 && match =~ @tiles[i - 1][j] || i == 0 && edge
 
-    return 14 if up && rt && dn && lf
-    return 12 if up && rt && dn
-    return 20 if up && rt && lf
-    return 21 if up && dn && lf
-    return 13 if rt && dn && lf
-    return 18 if up && rt
-    return 22 if up && dn
-    return 19 if up && lf
-    return 10 if rt && dn
-    return 15 if rt && lf
-    return 11 if dn && lf
-    return 8 if up
-    return 9 if rt
-    return 17 if dn
-    return 16 if lf
-    23
+    tile = 23
+    if up && rt && dn && lf
+      tile = 14
+    elsif up && rt && dn
+      tile = 12
+    elsif up && rt && lf
+      tile = 20
+    elsif up && dn && lf
+      tile = 21
+    elsif rt && dn && lf
+      tile = 13
+    elsif up && rt
+      tile = 18
+    elsif up && dn
+      tile = 22
+    elsif up && lf
+      tile = 19
+    elsif rt && dn
+      tile = 10
+    elsif rt && lf
+      tile = 15
+    elsif dn && lf
+      tile = 11
+    elsif up
+      tile = 8
+    elsif rt
+      tile = 9
+    elsif dn
+      tile = 17
+    elsif lf
+      tile = 16
+    end
+    hole ? tile + 16 : tile
   end
 
   def update
@@ -97,9 +119,10 @@ class Screen
     (0..SCREEN_COLS).each do |i|
       (0..SCREEN_ROWS).each do |j|
         if @overlays[i][j]
-          @tileset[OVERLAY_TILE_INDEX].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
-                                            j * Game.tile_size + @margin.y - Game.tile_size / 2,
-                                            1, Game.scale, Game.scale)
+          index = @overlays[i][j].downcase == 'h' ? OVERLAY_HOLE_INDEX : OVERLAY_PATH_INDEX
+          @tileset[index].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
+                               j * Game.tile_size + @margin.y - Game.tile_size / 2,
+                               1, Game.scale, Game.scale)
         end
 
         next if i == SCREEN_COLS || j == SCREEN_ROWS
