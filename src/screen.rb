@@ -11,14 +11,23 @@ class Screen
 
   def initialize
     @tileset = Res.tileset('1', BASE_TILE_SIZE, BASE_TILE_SIZE)
-    @tiles = Array.new(SCREEN_COLS) do
+    tile_codes = Array.new(SCREEN_COLS) do
       Array.new(SCREEN_ROWS)
     end
     File.open("#{Res.prefix}screen/1") do |f|
       f.each.with_index do |line, j|
         line.chomp.each_char.with_index do |c, i|
-          @tiles[i][j] = c
+          tile_codes[i][j] = c
         end
+      end
+    end
+
+    @tiles = Array.new(SCREEN_COLS) do
+      Array.new(SCREEN_ROWS)
+    end
+    (0...SCREEN_COLS).each do |i|
+      (0...SCREEN_ROWS).each do |j|
+        @tiles[i][j] = get_tile(tile_codes, i, j)
       end
     end
 
@@ -27,17 +36,20 @@ class Screen
     end
     (0..SCREEN_COLS).each do |i|
       (0..SCREEN_ROWS).each do |j|
-        tl = i == 0 || j == 0 ? nil : @tiles[i - 1][j - 1]
-        tr = i == SCREEN_COLS || j == 0 ? nil : @tiles[i][j - 1]
-        bl = i == 0 || j == SCREEN_ROWS ? nil : @tiles[i - 1][j]
-        br = i == SCREEN_COLS || j == SCREEN_ROWS ? nil : @tiles[i][j]
+        tl = i == 0 || j == 0 ? nil : tile_codes[i - 1][j - 1]
+        tr = i == SCREEN_COLS || j == 0 ? nil : tile_codes[i][j - 1]
+        bl = i == 0 || j == SCREEN_ROWS ? nil : tile_codes[i - 1][j]
+        br = i == SCREEN_COLS || j == SCREEN_ROWS ? nil : tile_codes[i][j]
         next if [tl, tr, bl, br].compact.map(&:downcase).uniq.size > 1
 
         top_left = i == 0 && j == 0 || i == 0 && /[PH]/ =~ tr || j == 0 && /[PH]/ =~ bl || /[pPhH]/ =~ tl
         top_right = i == SCREEN_COLS && j == 0 || i == SCREEN_COLS && /[PH]/ =~ tl || j == 0 && /[PH]/ =~ br || /[pPhH]/ =~ tr
         bottom_left = i == 0 && j == SCREEN_ROWS || i == 0 && /[PH]/ =~ br || j == SCREEN_ROWS && /[PH]/ =~ tl || /[pPhH]/ =~ bl
         bottom_right = i == SCREEN_COLS && j == SCREEN_ROWS || i == SCREEN_COLS && /[PH]/ =~ bl || j == SCREEN_ROWS && /[PH]/ =~ tr || /[pPhH]/ =~ br
-        @overlays[i][j] = top_left && top_right && bottom_left && bottom_right && (tl || tr || bl || br)
+        if top_left && top_right && bottom_left && bottom_right
+          type = (tl || tr || bl || br).downcase
+          @overlays[i][j] = type == 'h' ? OVERLAY_HOLE_INDEX : OVERLAY_PATH_INDEX
+        end
       end
     end
 
@@ -64,16 +76,16 @@ class Screen
     @objects[11][10] << Wall.new(@margin.x + 11 * Game.tile_size, @margin.y + 10 * Game.tile_size, 11, 10)
   end
 
-  def get_tile(i, j)
-    return 0 if @tiles[i][j] == '.'
+  def get_tile(tile_codes, i, j)
+    return 0 if tile_codes[i][j] == '.'
 
-    hole = /[hH]/ =~ @tiles[i][j]
-    edge = /[PH]/ =~ @tiles[i][j]
+    hole = /[hH]/ =~ tile_codes[i][j]
+    edge = /[PH]/ =~ tile_codes[i][j]
     match = hole ? /[hH]/ : /[pP]/
-    up = j > 0 && match =~ @tiles[i][j - 1] || j == 0 && edge
-    rt = i < SCREEN_COLS - 1 && match =~ @tiles[i + 1][j] || i == SCREEN_COLS - 1 && edge
-    dn = j < SCREEN_ROWS - 1 && match =~ @tiles[i][j + 1] || j == SCREEN_ROWS - 1 && edge
-    lf = i > 0 && match =~ @tiles[i - 1][j] || i == 0 && edge
+    up = j > 0 && match =~ tile_codes[i][j - 1] || j == 0 && edge
+    rt = i < SCREEN_COLS - 1 && match =~ tile_codes[i + 1][j] || i == SCREEN_COLS - 1 && edge
+    dn = j < SCREEN_ROWS - 1 && match =~ tile_codes[i][j + 1] || j == SCREEN_ROWS - 1 && edge
+    lf = i > 0 && match =~ tile_codes[i - 1][j] || i == 0 && edge
 
     tile = 23
     if up && rt && dn && lf
@@ -119,15 +131,13 @@ class Screen
     (0..SCREEN_COLS).each do |i|
       (0..SCREEN_ROWS).each do |j|
         if @overlays[i][j]
-          index = @overlays[i][j].downcase == 'h' ? OVERLAY_HOLE_INDEX : OVERLAY_PATH_INDEX
-          @tileset[index].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
-                               j * Game.tile_size + @margin.y - Game.tile_size / 2,
-                               1, Game.scale, Game.scale)
+          @tileset[@overlays[i][j]].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
+                                         j * Game.tile_size + @margin.y - Game.tile_size / 2,
+                                         1, Game.scale, Game.scale)
         end
 
         next if i == SCREEN_COLS || j == SCREEN_ROWS
-        index = get_tile(i, j)
-        @tileset[index].draw(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, 0, Game.scale, Game.scale)
+        @tileset[@tiles[i][j]].draw(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, 0, Game.scale, Game.scale)
         if (i + j) % 2 == 0
           Gosu.draw_rect(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, Game.tile_size, Game.tile_size, 0x08000000, 2)
         end
