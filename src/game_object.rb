@@ -2,7 +2,7 @@ require 'minigl'
 require_relative 'game'
 
 class GameObject < MiniGL::GameObject
-  attr_reader :col, :row, :moving
+  attr_reader :col, :row, :moving, :dead
 
   def initialize(x, y, col, row, img, img_gap, sprite_cols = nil, sprite_rows = nil)
     super(x, y, Game.tile_size, Game.tile_size, img, img_gap * Game.scale, sprite_cols, sprite_rows)
@@ -54,6 +54,7 @@ class GameObject < MiniGL::GameObject
     if @moving == 1
       move
     elsif @moving == 2
+      yield if block_given?
       @moving = 0
     end
   end

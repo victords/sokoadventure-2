@@ -59,7 +59,7 @@ class Man < GameObject
     end
   end
 
-  def check_move(dir, objects)
+  def check_move(dir, objects, tiles)
     return if @moving == 1
 
     x_var, y_var, col, row, n_col, n_row =
@@ -70,18 +70,22 @@ class Man < GameObject
       else        [-Game.tile_size, 0, @col - 1, @row, @col - 2, @row]
       end
     return set_dir(dir) if col < 0 || row < 0 || col >= SCREEN_COLS || row >= SCREEN_ROWS
+    return set_dir(dir) if tiles[col][row][:type] == :hole
 
     blocked = false
     objects[col][row].each do |obj|
       break blocked = true if obj.is_a?(Wall)
 
       if obj.is_a?(Box)
+        break blocked = true if obj.falling
+
         start_push(dir)
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
         break blocked = true unless objects[n_col][n_row].empty?
 
         objects[n_col][n_row] << obj
         objects[col][row].delete(obj)
+        obj.prepare_fall if tiles[n_col][n_row][:type] == :hole
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       end
     end
@@ -97,7 +101,7 @@ class Man < GameObject
     end
   end
 
-  def update(objects)
+  def update(objects, tiles)
     base = animation_base
     if @moving == 1
       indices = @pushing ?
@@ -122,13 +126,13 @@ class Man < GameObject
 
     @pushing = false unless @moving == 1
     if KB.key_down?(Gosu::KB_UP)
-      check_move(0, objects)
+      check_move(0, objects, tiles)
     elsif KB.key_down?(Gosu::KB_RIGHT)
-      check_move(1, objects)
+      check_move(1, objects, tiles)
     elsif KB.key_down?(Gosu::KB_DOWN)
-      check_move(2, objects)
+      check_move(2, objects, tiles)
     elsif KB.key_down?(Gosu::KB_LEFT)
-      check_move(3, objects)
+      check_move(3, objects, tiles)
     elsif @moving == 2
       @moving = 0
       @dust.stop
