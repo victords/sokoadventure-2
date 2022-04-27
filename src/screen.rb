@@ -138,8 +138,8 @@ class Screen
   end
 
   def draw
-    (0...SCREEN_COLS).each do |i|
-      (0...SCREEN_ROWS).each do |j|
+    (0..SCREEN_COLS).each do |i|
+      (0..SCREEN_ROWS).each do |j|
         if @overlays[i][j]
           @tileset[@overlays[i][j]].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
                                          j * Game.tile_size + @margin.y - Game.tile_size / 2,

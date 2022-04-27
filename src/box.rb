@@ -30,7 +30,7 @@ class Box < GameObject
     end
     return unless @falling == 1
 
-    animate_once(@indices, 5) do
+    animate_once(@indices, 3) do
       @fallen = true
     end
   end
