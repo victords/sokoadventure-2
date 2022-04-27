@@ -129,12 +129,9 @@ class Screen
       col.each_with_index do |cell, j|
         cell.reverse_each do |obj|
           obj.update
-          next unless obj.dead
-
           if obj.is_a?(Box) && @tiles[i][j][:type] == :hole
-            @tiles[i][j] = { type: :ground, index: COVERED_HOLE_INDEX }
+            @tiles[i][j][:type] = :ground
           end
-          cell.delete(obj)
         end
       end
     end
@@ -143,34 +140,32 @@ class Screen
   def draw
     (0...SCREEN_COLS).each do |i|
       (0...SCREEN_ROWS).each do |j|
-        @tileset[@tiles[i][j][:index]].draw(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, 10 * j, Game.scale, Game.scale)
-      end
-    end
-    (0..SCREEN_COLS).each do |i|
-      (0..SCREEN_ROWS).each do |j|
         if @overlays[i][j]
           @tileset[@overlays[i][j]].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
                                          j * Game.tile_size + @margin.y - Game.tile_size / 2,
-                                         10 * j, Game.scale, Game.scale)
+                                         1, Game.scale, Game.scale)
         end
-        if i < SCREEN_COLS && j < SCREEN_ROWS && (i + j) % 2 == 0
-          Gosu.draw_rect(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, Game.tile_size, Game.tile_size, 0x08000000, 10 * j)
+        next if i == SCREEN_COLS || j == SCREEN_ROWS
+
+        @tileset[@tiles[i][j][:index]].draw(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, 0, Game.scale, Game.scale)
+        if (i + j) % 2 == 0
+          Gosu.draw_rect(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, Game.tile_size, Game.tile_size, 0x08000000, 2)
         end
       end
     end
 
-    @man.draw(10 * ((@man.y - @margin.y) / Game.tile_size).ceil + 5)
     @objects.flatten.each do |obj|
-      obj.draw(10 * ((obj.y - @margin.y) / Game.tile_size).ceil + 5)
+      obj.draw(2 + ((obj.y - @margin.y) / Game.tile_size).ceil)
     end
+    @man.draw(2 + ((@man.y - @margin.y) / Game.tile_size).ceil)
 
     if @margin.x > 0.01
-      Gosu.draw_rect(0, 0, @margin.x, Game.window_size.y, 0xff000000, 1000)
-      Gosu.draw_rect(Game.window_size.x - @margin.x, 0, @margin.x, Game.window_size.y, 0xff000000, 1000)
+      Gosu.draw_rect(0, 0, @margin.x, Game.window_size.y, 0xff000000, 100)
+      Gosu.draw_rect(Game.window_size.x - @margin.x, 0, @margin.x, Game.window_size.y, 0xff000000, 100)
     end
     if @margin.y > 0.01
-      Gosu.draw_rect(0, 0, Game.window_size.x, @margin.y, 0xff000000, 1000)
-      Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 1000)
+      Gosu.draw_rect(0, 0, Game.window_size.x, @margin.y, 0xff000000, 100)
+      Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 100)
     end
   end
 end

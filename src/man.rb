@@ -77,15 +77,16 @@ class Man < GameObject
       break blocked = true if obj.is_a?(Wall)
 
       if obj.is_a?(Box)
+        next if obj.fallen
         break blocked = true if obj.falling
 
         start_push(dir)
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
-        break blocked = true unless objects[n_col][n_row].empty?
+        break blocked = true if objects[n_col][n_row].any? { |o| o.is_a?(Wall) || o.is_a?(Box) && !o.fallen }
 
         objects[n_col][n_row] << obj
         objects[col][row].delete(obj)
-        obj.prepare_fall if tiles[n_col][n_row][:type] == :hole
+        obj.prepare_fall(tiles[n_col][n_row][:index]) if tiles[n_col][n_row][:type] == :hole
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       end
     end

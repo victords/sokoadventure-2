@@ -1,35 +1,37 @@
 require_relative 'game_object'
 
 class Box < GameObject
-  FALL_ACCEL = 0.05
-
-  attr_reader :falling
+  attr_reader :falling, :fallen
 
   def initialize(x, y, col, row)
-    super(x, y, col, row, :sprite_box1, Vector.new(0, -80), 2, 1)
+    super(x, y, col, row, :sprite_box1, Vector.new(0, -80), 7, 3)
   end
 
-  def prepare_fall
-    @falling = -1
-    @start_y = y + @img_gap.y
+  def prepare_fall(tile_index)
+    @falling = 0
+    base = case tile_index
+           when 26, 27, 28, 29, 30, 33, 37, 38
+             1
+           when 24, 39
+             5
+           when 25, 34
+             9
+           when 32, 35
+             13
+           else # 31, 36
+             17
+           end
+    @indices = [base, base + 1, base + 2, base + 3]
   end
 
   def update
     super do
-      @falling = 0 if @falling
+      @falling = 1 if @falling == 0
     end
-    return unless @falling && @falling >= 0
+    return unless @falling == 1
 
-    @falling += FALL_ACCEL
-    @img_gap.y += @falling
-    if @img_gap.y >= 0
-      @img_gap.y = 0
-      @dead = true
+    animate_once(@indices, 5) do
+      @fallen = true
     end
-  end
-
-  def draw(z_index = 0, flip = nil)
-    super
-    @img[1].draw(@x, @start_y, z_index, Game.scale, Game.scale) if @falling
   end
 end
