@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="40"
-   height="30"
-   viewBox="0 0 10.583333 7.9375003"
+   width="30"
+   height="40"
+   viewBox="0 0 7.9374997 10.583334"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
@@ -28,9 +28,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="15.651266"
-     inkscape:cx="15.949241"
-     inkscape:cy="16.002264"
+     inkscape:zoom="1"
+     inkscape:cx="14.01632"
+     inkscape:cy="20.581795"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -59,12 +59,11 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-289.06249)">
+     transform="translate(0,-286.41666)">
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.5291667;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 10.583333,296.30816 c 0,0 -3.8961117,0.72212 -7.1794596,0.69086 -3.57271635,-0.034 -3.40258698,-4.07605 -3.40258698,-4.07605 0,0 0.01701292,-4.2307 3.99803978,-3.83425 3.6054111,0.35905 6.5840068,7.21944 6.5840068,7.21944 z"
-       id="path2260"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cscsc" />
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 15 0 C 15 0 0 12.604699 0 25 C 0 39.950904 15 40 15 40 C 15 40 30 39.950904 30 25 C 30 12.604699 15 0 15 0 z "
+       transform="matrix(0.26458334,0,0,0.26458334,0,286.41666)"
+       id="path818" />
   </g>
 </svg>

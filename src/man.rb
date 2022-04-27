@@ -13,24 +13,25 @@ class Man < GameObject
                           color: 0xdddddd,
                           emission_interval: 10,
                           duration: 30,
-                          spread: 40,
+                          spread: 20,
                           grow: 0..1,
-                          move: Vector.new(0, -30))
-    @sweat_left = Particles.new(type: :drop,
-                                color: 0x99ddff,
-                                emission_interval: 10,
-                                duration: 40,
-                                spread: 40,
-                                grow: 0.5..1,
-                                move: Vector.new(-30, -15))
-    @sweat_right = Particles.new(type: :drop,
-                                 color: 0x99ddff,
-                                 emission_interval: 10,
-                                 duration: 40,
-                                 spread: 40,
-                                 grow: 0.5..1,
-                                 move: Vector.new(30, -15),
-                                 flip: :horiz)
+                          move: [0, -30])
+    @sweat = (0..3).map do |dir|
+      angle, move_x, move_y = case dir
+                              when 0 then [0, -5..5, 20..40]
+                              when 1 then [120, -40..-20, -5..5]
+                              when 2 then [180, -5..5, -40..-20]
+                              else        [240, 20..40, -5..5]
+                              end
+      Particles.new(type: :drop,
+                    color: 0x99ddff,
+                    emission_interval: 5..20,
+                    duration: 40,
+                    spread: 40,
+                    grow: 0.5..1,
+                    angle: angle,
+                    move: [move_x, move_y])
+    end
   end
 
   def animation_base
@@ -52,11 +53,7 @@ class Man < GameObject
 
   def start_push(dir)
     @pushing = true
-    if dir == 0 || dir == 1
-      @sweat_left.start
-    else
-      @sweat_right.start
-    end
+    @sweat[dir].start
   end
 
   def check_move(dir, objects, tiles)
@@ -118,11 +115,9 @@ class Man < GameObject
     end
 
     @dust.update
-    @sweat_left.update
-    @sweat_right.update
+    @sweat.each(&:update)
     if @pushing
-      @sweat_left.move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
-      @sweat_right.move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
+      @sweat[@dir].move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
     end
 
     @pushing = false unless @moving == 1
@@ -140,15 +135,13 @@ class Man < GameObject
     end
 
     unless @pushing
-      @sweat_left.stop
-      @sweat_right.stop
+      @sweat.each(&:stop)
     end
   end
 
   def draw(z_index)
     @dust.draw(z_index)
     super(z_index, @dir == 3 ? :horiz : nil)
-    @sweat_left.draw(z_index)
-    @sweat_right.draw(z_index)
+    @sweat.each { |s| s.draw(z_index) }
   end
 end

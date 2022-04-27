@@ -12,7 +12,7 @@ class Box < GameObject
                     emission_interval: 0,
                     duration: 90,
                     alpha_inflection: 0.1,
-                    move: Vector.new(0, -30))
+                    move: [0, -30])
     end
   end
 

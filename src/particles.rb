@@ -1,7 +1,33 @@
 require 'minigl'
 require_relative 'game'
 
-include MiniGL
+class Particle < MiniGL::Effect
+  attr_reader :speed
+  attr_writer :angle
+
+  def initialize(x, y, img, sprite_cols, sprite_rows, interval, indices, flip)
+    super(x, y, img, sprite_cols, sprite_rows, interval, indices)
+    @speed = Vector.new
+    @flip = flip
+    @angle = nil
+  end
+
+  def update
+    super
+    @x += @speed.x
+    @y += @speed.y
+  end
+
+  def draw(scale, alpha, color, z_index)
+    prev_x = @x
+    prev_y = @y
+    @x -= @img[0].width * scale / 2
+    @y -= @img[0].height * scale / 2
+    super(nil, scale, scale, alpha, color, @angle, @flip, z_index)
+    @x = prev_x
+    @y = prev_y
+  end
+end
 
 class Particles
   DEFAULT_OPTIONS = {
@@ -31,33 +57,18 @@ class Particles
     @playing = false
   end
 
-  def update
-    @elements.reverse_each do |e|
-      e.update
-      if @options[:move]
-        e.x += @options[:move].x.to_f / @options[:duration] * Game.scale
-        e.y += @options[:move].y.to_f / @options[:duration] * Game.scale
-      end
-      @elements.delete(e) if e.dead
-    end
-
-    return unless @playing
-
-    @timer += 1
-    if @timer >= @options[:emission_interval]
-      x = @options[:area] ? @x + rand * @options[:area].x * Game.scale : @x + @options[:spread] * (rand - 0.5) * Game.scale
-      y = @options[:area] ? @y + rand * @options[:area].y * Game.scale : @y + @options[:spread] * (rand - 0.5) * Game.scale
-      @elements << Effect.new(x, y, "fx_#{@type}", @sprite_cols, @sprite_rows, @options[:duration] / @indices.size, @indices)
-      @timer = 0
-    end
-  end
-
   def move(x, y)
     @x = x; @y = y
   end
 
+  def set_emission_time
+    interval = @options[:emission_interval]
+    @emission_time = interval.is_a?(Range) ? rand(interval) : interval
+  end
+
   def start
     @playing = true
+    set_emission_time if @emission_time.nil?
     self
   end
 
@@ -66,18 +77,37 @@ class Particles
     @timer = 0
   end
 
+  def update
+    @elements.reverse_each do |e|
+      e.update
+      @elements.delete(e) if e.dead
+    end
+
+    return unless @playing
+
+    @timer += 1
+    if @timer >= @emission_time
+      x = @options[:area] ? @x + rand * @options[:area].x * Game.scale : @x + @options[:spread] * (rand - 0.5) * Game.scale
+      y = @options[:area] ? @y + rand * @options[:area].y * Game.scale : @y + @options[:spread] * (rand - 0.5) * Game.scale
+      @elements << (e = Particle.new(x, y, "fx_#{@type}", @sprite_cols, @sprite_rows, @options[:duration] / @indices.size, @indices, @options[:flip]))
+      if @options[:move]
+        d_x = @options[:move][0].is_a?(Range) ? rand(@options[:move][0]) : @options[:move][0]
+        e.speed.x = d_x.to_f / @options[:duration] * Game.scale
+        d_y = @options[:move][1].is_a?(Range) ? rand(@options[:move][1]) : @options[:move][1]
+        e.speed.y = d_y.to_f / @options[:duration] * Game.scale
+      end
+      e.angle = @options[:angle]
+      @timer = 0
+      set_emission_time
+    end
+  end
+
   def draw(z_index = 0)
     @elements.each do |e|
       alpha = (alternating_rate(e.elapsed_time, @options[:duration], @options[:alpha_inflection]) * 255).round
       scale = @options[:grow] ? @options[:grow].min + e.elapsed_time.to_f / @options[:duration] * (@options[:grow].max - @options[:grow].min) : 1
       scale *= Game.scale
-      prev_x = e.x
-      prev_y = e.y
-      e.x -= e.img[0].width * scale / 2
-      e.y -= e.img[0].height * scale / 2
-      e.draw(nil, scale, scale, alpha, @options[:color], nil, @options[:flip], z_index)
-      e.x = prev_x
-      e.y = prev_y
+      e.draw(scale, alpha, @options[:color], z_index)
     end
   end
 
