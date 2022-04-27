@@ -1,10 +1,19 @@
 require_relative 'game_object'
+require_relative 'particles'
 
 class Box < GameObject
   attr_reader :falling, :fallen
 
   def initialize(x, y, col, row)
     super(x, y, col, row, :sprite_box1, Vector.new(0, -80), 7, 3)
+    @dust = (0..3).map do |_|
+      Particles.new(type: :dust,
+                    color: 0xdddddd,
+                    emission_interval: 0,
+                    duration: 90,
+                    alpha_inflection: 0.1,
+                    move: Vector.new(0, -30))
+    end
   end
 
   def prepare_fall(tile_index)
@@ -25,6 +34,9 @@ class Box < GameObject
   end
 
   def update
+    @dust.each(&:update)
+    @dust.each(&:stop) if @fallen
+
     super do
       @falling = 1 if @falling == 0
     end
@@ -32,6 +44,17 @@ class Box < GameObject
 
     animate_once(@indices, 3) do
       @fallen = true
+      @dust.each_with_index do |d, i|
+        x = @x + (i % 2) * Game.tile_size
+        y = @y + (i / 2) * Game.tile_size
+        d.move(x, y)
+        d.start
+      end
     end
+  end
+
+  def draw(z_index, flip = nil)
+    super
+    @dust.each { |d| d.draw(z_index) }
   end
 end

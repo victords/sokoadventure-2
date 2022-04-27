@@ -1,6 +1,5 @@
 require 'minigl'
 require_relative 'game'
-require_relative 'utils'
 
 include MiniGL
 
@@ -10,6 +9,7 @@ class Particles
     emission_interval: 60,
     duration: 60,
     spread: 0,
+    alpha_inflection: 0.5
   }.freeze
 
   attr_reader :playing, :x, :y
@@ -68,7 +68,7 @@ class Particles
 
   def draw(z_index = 0)
     @elements.each do |e|
-      alpha = (Utils.alternating_rate(e.elapsed_time, @options[:duration]) * 255).round
+      alpha = (alternating_rate(e.elapsed_time, @options[:duration], @options[:alpha_inflection]) * 255).round
       scale = @options[:grow] ? @options[:grow].min + e.elapsed_time.to_f / @options[:duration] * (@options[:grow].max - @options[:grow].min) : 1
       scale *= Game.scale
       prev_x = e.x
@@ -79,5 +79,13 @@ class Particles
       e.x = prev_x
       e.y = prev_y
     end
+  end
+
+  private
+
+  def alternating_rate(timer, interval, inflection_point_at)
+    inflection_point = interval * inflection_point_at
+    (timer >= inflection_point ? interval - timer : timer).to_f /
+      (timer >= inflection_point ? interval - inflection_point : inflection_point)
   end
 end
