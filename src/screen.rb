@@ -2,6 +2,7 @@ require 'minigl'
 require_relative 'man'
 require_relative 'box'
 require_relative 'wall'
+require_relative 'ball'
 
 include MiniGL
 
@@ -65,16 +66,13 @@ class Screen
     end
     @objects[2][1] << Box.new(@margin.x + 2 * Game.tile_size, @margin.y + 1 * Game.tile_size, 2, 1)
     @objects[4][6] << Box.new(@margin.x + 4 * Game.tile_size, @margin.y + 6 * Game.tile_size, 4, 6)
-    @objects[3][8] << Wall.new(@margin.x + 3 * Game.tile_size, @margin.y + 8 * Game.tile_size, 3, 8)
-    @objects[4][8] << Wall.new(@margin.x + 4 * Game.tile_size, @margin.y + 8 * Game.tile_size, 4, 8)
-    @objects[5][8] << Wall.new(@margin.x + 5 * Game.tile_size, @margin.y + 8 * Game.tile_size, 5, 8)
-    @objects[6][8] << Wall.new(@margin.x + 6 * Game.tile_size, @margin.y + 8 * Game.tile_size, 6, 8)
-    @objects[7][8] << Wall.new(@margin.x + 7 * Game.tile_size, @margin.y + 8 * Game.tile_size, 7, 8)
     @objects[17][2] << Wall.new(@margin.x + 17 * Game.tile_size, @margin.y + 2 * Game.tile_size, 17, 2)
     @objects[17][3] << Wall.new(@margin.x + 17 * Game.tile_size, @margin.y + 3 * Game.tile_size, 17, 3)
     @objects[17][4] << Wall.new(@margin.x + 17 * Game.tile_size, @margin.y + 4 * Game.tile_size, 17, 4)
     @objects[15][6] << Wall.new(@margin.x + 15 * Game.tile_size, @margin.y + 6 * Game.tile_size, 15, 6)
     @objects[11][10] << Wall.new(@margin.x + 11 * Game.tile_size, @margin.y + 10 * Game.tile_size, 11, 10)
+    @objects[3][7] << Ball.new(@margin.x + 3 * Game.tile_size, @margin.y + 7 * Game.tile_size, 3, 7)
+    @objects[5][7] << Ball.new(@margin.x + 5 * Game.tile_size, @margin.y + 7 * Game.tile_size, 5, 7)
   end
 
   def get_tile(tile_codes, i, j)

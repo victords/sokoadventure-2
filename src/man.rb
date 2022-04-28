@@ -56,6 +56,10 @@ class Man < GameObject
     @sweat[dir].start
   end
 
+  def blocking?(obj)
+    obj.is_a?(Wall) || obj.is_a?(Ball) || obj.is_a?(Box) && !obj.fallen
+  end
+
   def check_move(dir, objects, tiles)
     return if @moving == 1
 
@@ -79,11 +83,19 @@ class Man < GameObject
 
         start_push(dir)
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
-        break blocked = true if objects[n_col][n_row].any? { |o| o.is_a?(Wall) || o.is_a?(Box) && !o.fallen }
+        break blocked = true if objects[n_col][n_row].any? { |o| blocking?(o) }
 
         objects[n_col][n_row] << obj
         objects[col][row].delete(obj)
         obj.prepare_fall(tiles[n_col][n_row][:index]) if tiles[n_col][n_row][:type] == :hole
+        obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
+      elsif obj.is_a?(Ball)
+        start_push(dir)
+        break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
+        break blocked = true if tiles[n_col][n_row][:type] == :hole || objects[n_col][n_row].any? { |o| blocking?(o) }
+
+        objects[n_col][n_row] << obj
+        objects[col][row].delete(obj)
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       end
     end
