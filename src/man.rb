@@ -77,7 +77,8 @@ class Man < GameObject
     objects[col][row].each do |obj|
       break blocked = true if obj.is_a?(Wall)
 
-      if obj.is_a?(Box)
+      case obj
+      when Box
         next if obj.fallen
         break blocked = true if obj.falling
 
@@ -89,13 +90,18 @@ class Man < GameObject
         objects[col][row].delete(obj)
         obj.prepare_fall(tiles[n_col][n_row][:index]) if tiles[n_col][n_row][:type] == :hole
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
-      elsif obj.is_a?(Ball)
+      when Ball
         start_push(dir)
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
         break blocked = true if tiles[n_col][n_row][:type] == :hole || objects[n_col][n_row].any? { |o| blocking?(o) }
 
         objects[n_col][n_row] << obj
         objects[col][row].delete(obj)
+        if tiles[n_col][n_row][:type] == :aim
+          obj.prepare_set
+        else
+          obj.unset
+        end
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       end
     end

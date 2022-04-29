@@ -7,7 +7,8 @@ require_relative 'ball'
 include MiniGL
 
 class Screen
-  COVERED_HOLE_INDEX = 5
+  GROUND_INDEX = 0
+  AIM_INDEX = 5
   OVERLAY_HOLE_INDEX = 6
   OVERLAY_PATH_INDEX = 7
 
@@ -76,7 +77,8 @@ class Screen
   end
 
   def get_tile(tile_codes, i, j)
-    return { type: :ground, index: 0 } if tile_codes[i][j] == '.'
+    return { type: :ground, index: GROUND_INDEX } if tile_codes[i][j] == '.'
+    return { type: :aim, index: AIM_INDEX } if tile_codes[i][j] == 'a'
 
     hole = /[hH]/ =~ tile_codes[i][j]
     edge = /[PH]/ =~ tile_codes[i][j]
