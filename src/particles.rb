@@ -1,34 +1,6 @@
 require 'minigl'
 require_relative 'game'
 
-class Particle < MiniGL::Effect
-  attr_reader :speed
-  attr_writer :angle
-
-  def initialize(x, y, img, sprite_cols, sprite_rows, interval, indices, flip)
-    super(x, y, img, sprite_cols, sprite_rows, interval, indices)
-    @speed = Vector.new
-    @flip = flip
-    @angle = nil
-  end
-
-  def update
-    super
-    @x += @speed.x
-    @y += @speed.y
-  end
-
-  def draw(scale, alpha, color, z_index)
-    prev_x = @x
-    prev_y = @y
-    @x -= @img[0].width * scale / 2
-    @y -= @img[0].height * scale / 2
-    super(nil, scale, scale, alpha, color, @angle, @flip, z_index)
-    @x = prev_x
-    @y = prev_y
-  end
-end
-
 class Particles
   DEFAULT_OPTIONS = {
     color: 0xffffff,
@@ -46,6 +18,8 @@ class Particles
       case type
       when :dust, :drop
         [1, 1, [0]]
+      when :sparkle
+        [3, 1, [0, 1, 2, 1, 0]]
       end
     @x = x
     @y = y
@@ -117,5 +91,33 @@ class Particles
     inflection_point = interval * inflection_point_at
     (timer >= inflection_point ? interval - timer : timer).to_f /
       (timer >= inflection_point ? interval - inflection_point : inflection_point)
+  end
+
+  class Particle < MiniGL::Effect
+    attr_reader :speed
+    attr_writer :angle
+
+    def initialize(x, y, img, sprite_cols, sprite_rows, interval, indices, flip)
+      super(x, y, img, sprite_cols, sprite_rows, interval, indices)
+      @speed = Vector.new
+      @flip = flip
+      @angle = nil
+    end
+
+    def update
+      super
+      @x += @speed.x
+      @y += @speed.y
+    end
+
+    def draw(scale, alpha, color, z_index)
+      prev_x = @x
+      prev_y = @y
+      @x -= @img[0].width * scale / 2
+      @y -= @img[0].height * scale / 2
+      super(nil, scale, scale, alpha, color, @angle, @flip, z_index)
+      @x = prev_x
+      @y = prev_y
+    end
   end
 end

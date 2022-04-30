@@ -3,6 +3,7 @@ require_relative 'man'
 require_relative 'box'
 require_relative 'wall'
 require_relative 'ball'
+require_relative 'key'
 
 include MiniGL
 
@@ -42,6 +43,7 @@ class Screen
                     when 'b' then Ball
                     when 'x' then Box
                     when '#' then Wall
+                    when 'k' then Key
                     end
         @objects[i][j] << obj_class.new(@margin.x + i * Game.tile_size, @margin.y + j * Game.tile_size, i, j) if obj_class
       end
