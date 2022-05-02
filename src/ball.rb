@@ -35,7 +35,7 @@ class Ball < GameObject
     end
   end
 
-  def draw(z_index, flip = nil)
+  def draw(z_index)
     super
     return if !@set && @glow_alpha == 0
 

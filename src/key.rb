@@ -25,10 +25,12 @@ class Key < GameObject
     @sparkle.update
   end
 
-  def draw(z_index, flip = nil)
+  def draw(z_index)
+    flip = @index_index >= 3 && @index_index <= 7
+    @img[@img_index].draw(flip ? @x + @w : @x, @y + Game.scale * 40, z_index, flip ? -Game.scale : Game.scale, Game.scale * 0.5, 0x55000000)
     prev_y = @y
     @y = @start_y + OFFSET_RANGE * Math.sin(@offset * Math::PI / 180)
-    super(z_index, @index_index >= 3 && @index_index <= 7 ? :horiz : nil)
+    super(z_index, flip ? :horiz : nil)
     @y = prev_y
 
     @sparkle.draw(z_index)

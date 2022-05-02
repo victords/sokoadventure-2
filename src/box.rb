@@ -53,7 +53,7 @@ class Box < GameObject
     end
   end
 
-  def draw(z_index, flip = nil)
+  def draw(z_index)
     super
     @dust.each { |d| d.draw(z_index) }
   end
