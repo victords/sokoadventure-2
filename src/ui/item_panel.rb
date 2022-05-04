@@ -10,7 +10,7 @@ class ItemPanel
     @item_type = item_type
     @img = Res.img(:ui_panel1)
     @x = (Game.window_size.x - @img.width * Game.scale) / 2
-    @y = -@img.height * Game.scale
+    @y = Game.screen_margin.y - @img.height * Game.scale
     @state = 0
     @timer = 0
     @alpha = 255
@@ -34,9 +34,9 @@ class ItemPanel
   def update
     case @state
     when 0
-      @y += 5 * Game.scale
-      if @y >= 20 * Game.scale
-        @y = 20 * Game.scale
+      @y += 10 * Game.scale
+      if @y >= Game.screen_margin.y + 20 * Game.scale
+        @y = Game.screen_margin.y + 20 * Game.scale
         @state = 1
       end
     when 1
@@ -45,7 +45,7 @@ class ItemPanel
         @state = 2
       end
     when 2
-      @alpha -= 3
+      @alpha -= 5
       if @alpha <= 0
         @dead = true
       end

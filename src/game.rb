@@ -9,7 +9,7 @@ include MiniGL
 
 class Game
   class << self
-    attr_reader :window_size, :scale, :tile_size, :stats, :font
+    attr_reader :window_size, :scale, :tile_size, :screen_margin, :stats, :font
 
     def initialize
       os = RbConfig::CONFIG['host_os']
@@ -21,6 +21,8 @@ class Game
       @window_size = Vector.new(w, h)
       @scale = w.to_f / REF_SCREEN_WIDTH
       @tile_size = @scale * BASE_TILE_SIZE
+      @screen_margin = Vector.new((@window_size.x - @tile_size * SCREEN_COLS) / 2,
+                                  (@window_size.y - @tile_size * SCREEN_ROWS) / 2)
 
       @stats = Stats.new
     end

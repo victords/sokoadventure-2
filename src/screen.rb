@@ -27,8 +27,6 @@ class Screen
       end
     end
 
-    @margin = Vector.new((Game.window_size.x - Game.tile_size * SCREEN_COLS) / 2,
-                         (Game.window_size.y - Game.tile_size * SCREEN_ROWS) / 2)
     @tiles = Array.new(SCREEN_COLS) do
       Array.new(SCREEN_ROWS)
     end
@@ -49,7 +47,8 @@ class Screen
                     end
         next unless obj_class
 
-        @objects[i][j] << obj_class.new(@margin.x + i * Game.tile_size, @margin.y + j * Game.tile_size, i, j, code)
+        @objects[i][j] << obj_class.new(Game.screen_margin.x + i * Game.tile_size,
+                                        Game.screen_margin.y + j * Game.tile_size, i, j, code)
       end
     end
 
@@ -75,7 +74,7 @@ class Screen
       end
     end
 
-    @man = Man.new(@margin.x, @margin.y, 0, 0)
+    @man = Man.new(Game.screen_margin.x, Game.screen_margin.y, 0, 0)
 
     @ui_elements = []
     Game.stats.on_item_added << lambda do |type|
@@ -155,36 +154,38 @@ class Screen
   end
 
   def draw
+    margin = Game.screen_margin
+
     (0..SCREEN_COLS).each do |i|
       (0..SCREEN_ROWS).each do |j|
         if @overlays[i][j]
-          @tileset[@overlays[i][j]].draw(i * Game.tile_size + @margin.x - Game.tile_size / 2,
-                                         j * Game.tile_size + @margin.y - Game.tile_size / 2,
+          @tileset[@overlays[i][j]].draw(i * Game.tile_size + margin.x - Game.tile_size / 2,
+                                         j * Game.tile_size + margin.y - Game.tile_size / 2,
                                          1, Game.scale, Game.scale)
         end
         next if i == SCREEN_COLS || j == SCREEN_ROWS
 
-        @tileset[@tiles[i][j][:index]].draw(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, 0, Game.scale, Game.scale)
+        @tileset[@tiles[i][j][:index]].draw(i * Game.tile_size + margin.x, j * Game.tile_size + margin.y, 0, Game.scale, Game.scale)
         if (i + j) % 2 == 0
-          Gosu.draw_rect(i * Game.tile_size + @margin.x, j * Game.tile_size + @margin.y, Game.tile_size, Game.tile_size, 0x08000000, 2)
+          Gosu.draw_rect(i * Game.tile_size + margin.x, j * Game.tile_size + margin.y, Game.tile_size, Game.tile_size, 0x08000000, 2)
         end
       end
     end
 
     @objects.flatten.each do |obj|
-      obj.draw(2 + ((obj.y - @margin.y) / Game.tile_size).ceil)
+      obj.draw(2 + ((obj.y - margin.y) / Game.tile_size).ceil)
     end
-    @man.draw(2 + ((@man.y - @margin.y) / Game.tile_size).ceil)
-
-    if @margin.x > 0.01
-      Gosu.draw_rect(0, 0, @margin.x, Game.window_size.y, 0xff000000, 100)
-      Gosu.draw_rect(Game.window_size.x - @margin.x, 0, @margin.x, Game.window_size.y, 0xff000000, 100)
-    end
-    if @margin.y > 0.01
-      Gosu.draw_rect(0, 0, Game.window_size.x, @margin.y, 0xff000000, 100)
-      Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 100)
-    end
+    @man.draw(2 + ((@man.y - margin.y) / Game.tile_size).ceil)
 
     @ui_elements.each(&:draw)
+
+    if margin.x > 0.01
+      Gosu.draw_rect(0, 0, margin.x, Game.window_size.y, 0xff000000, UI_Z_INDEX + 100)
+      Gosu.draw_rect(Game.window_size.x - margin.x, 0, margin.x, Game.window_size.y, 0xff000000, UI_Z_INDEX + 100)
+    end
+    if margin.y > 0.01
+      Gosu.draw_rect(0, 0, Game.window_size.x, margin.y, 0xff000000, UI_Z_INDEX + 100)
+      Gosu.draw_rect(0, Game.window_size.y - margin.y, Game.window_size.x, margin.y, 0xff000000, UI_Z_INDEX + 100)
+    end
   end
 end
