@@ -39,13 +39,16 @@ class Screen
     (0...SCREEN_COLS).each do |i|
       (0...SCREEN_ROWS).each do |j|
         @tiles[i][j] = get_tile(tile_codes, i, j)
-        obj_class = case tile_codes[i][j]
-                    when 'b' then Ball
-                    when 'x' then Box
-                    when '#' then Wall
-                    when 'k' then Key
+        code = tile_codes[i][j]
+        obj_class = case code
+                    when /[bB]/  then Ball
+                    when 'x'     then Box
+                    when '#'     then Wall
+                    when /[k-n]/ then Key
                     end
-        @objects[i][j] << obj_class.new(@margin.x + i * Game.tile_size, @margin.y + j * Game.tile_size, i, j) if obj_class
+        next unless obj_class
+
+        @objects[i][j] << obj_class.new(@margin.x + i * Game.tile_size, @margin.y + j * Game.tile_size, i, j, code)
       end
     end
 
@@ -75,8 +78,8 @@ class Screen
   end
 
   def get_tile(tile_codes, i, j)
-    return { type: :ground, index: GROUND_INDEX } if /[.bx#]/ =~ tile_codes[i][j]
-    return { type: :aim, index: AIM_INDEX } if tile_codes[i][j] == 'a'
+    return { type: :ground, index: GROUND_INDEX } if /[.bx#k-n]/ =~ tile_codes[i][j]
+    return { type: :aim, index: AIM_INDEX } if /[aB]/ =~ tile_codes[i][j]
 
     hole = /[hH]/ =~ tile_codes[i][j]
     edge = /[PH]/ =~ tile_codes[i][j]

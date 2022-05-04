@@ -5,7 +5,7 @@ class Key < GameObject
   OFFSET_SPEED = 4
   OFFSET_RANGE = 5
 
-  def initialize(x, y, col, row)
+  def initialize(x, y, col, row, arg)
     super(x, y, col, row, :sprite_key1, Vector.new(20, -60), 7, 1)
     @start_y = y
     @offset = 0
@@ -14,6 +14,13 @@ class Key < GameObject
                              y: @y + @img_gap.y + @h / 2,
                              spread: 80,
                              duration: 30).start
+    @type = arg
+    @color = case arg
+             when 'k' then 0xdd0000
+             when 'l' then 0x1133ff
+             when 'm' then 0xf6ca13
+             when 'n' then 0x009911
+             end
   end
 
   def update
@@ -30,7 +37,7 @@ class Key < GameObject
     @img[@img_index].draw(shadow_x, @y, z_index, flip ? -Game.scale : Game.scale, Game.scale, 0x55000000)
     prev_y = @y
     @y = @start_y + OFFSET_RANGE * Math.sin(@offset * Math::PI / 180)
-    super(z_index, flip ? :horiz : nil)
+    super(z_index, flip ? :horiz : nil, @color)
     @y = prev_y
 
     @sparkle.draw(z_index)

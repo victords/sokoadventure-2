@@ -59,7 +59,7 @@ class GameObject < MiniGL::GameObject
     end
   end
 
-  def draw(z_index, flip = nil)
-    super(nil, Game.scale, Game.scale, 255, 0xffffff, nil, flip, z_index)
+  def draw(z_index, flip = nil, color = 0xffffff)
+    super(nil, Game.scale, Game.scale, 255, color, nil, flip, z_index)
   end
 end
