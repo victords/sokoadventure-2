@@ -103,6 +103,8 @@ class Man < GameObject
           obj.unset
         end
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
+      when Key
+        @on_move_end = lambda { obj.take }
       end
     end
 
@@ -126,6 +128,10 @@ class Man < GameObject
       animate(indices, 7)
       move
       @dust.move(@x + @w / 2, @y + @h + @img_gap.y)
+      if @moving == 2 && @on_move_end
+        @on_move_end.call
+        @on_move_end = nil
+      end
     elsif @pushing
       animate([base + 8, base + 9], 7)
     else

@@ -4,6 +4,7 @@ require_relative 'box'
 require_relative 'wall'
 require_relative 'ball'
 require_relative 'key'
+require_relative 'ui/item_panel'
 
 include MiniGL
 
@@ -75,6 +76,15 @@ class Screen
     end
 
     @man = Man.new(@margin.x, @margin.y, 0, 0)
+
+    @ui_elements = []
+    Game.stats.on_item_added << lambda do |type|
+      if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
+        e.refresh
+      else
+        @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
+      end
+    end
   end
 
   def get_tile(tile_codes, i, j)
@@ -133,8 +143,14 @@ class Screen
           if obj.is_a?(Box) && @tiles[i][j][:type] == :hole
             @tiles[i][j][:type] = :ground
           end
+          cell.delete(obj) if obj.dead
         end
       end
+    end
+
+    @ui_elements.reverse_each do |e|
+      e.update
+      @ui_elements.delete(e) if e.dead
     end
   end
 
@@ -168,5 +184,7 @@ class Screen
       Gosu.draw_rect(0, 0, Game.window_size.x, @margin.y, 0xff000000, 100)
       Gosu.draw_rect(0, Game.window_size.y - @margin.y, Game.window_size.x, @margin.y, 0xff000000, 100)
     end
+
+    @ui_elements.each(&:draw)
   end
 end

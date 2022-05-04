@@ -7,6 +7,7 @@ BASE_TILE_SIZE = 160
 SCREEN_COLS = 24
 SCREEN_ROWS = 13
 MOVE_SPEED = 10
+UI_Z_INDEX = 1000
 
 Vector = MiniGL::Vector
 Locl = MiniGL::Localization

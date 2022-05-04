@@ -14,13 +14,18 @@ class Key < GameObject
                              y: @y + @img_gap.y + @h / 2,
                              spread: 80,
                              duration: 30).start
-    @type = arg
+    @type = "key_#{arg}"
     @color = case arg
              when 'k' then 0xdd0000
              when 'l' then 0x1133ff
              when 'm' then 0xf6ca13
              when 'n' then 0x009911
              end
+  end
+
+  def take
+    @dead = true
+    Game.stats.add_item(@type)
   end
 
   def update
