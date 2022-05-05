@@ -8,6 +8,7 @@ SCREEN_COLS = 24
 SCREEN_ROWS = 13
 MOVE_SPEED = 10
 UI_Z_INDEX = 1000
+TRANSITION_Z_INDEX = 2000
 
 ITEM_UI_ATTRS = {
   key_k: { icon: :Key, color: 0xdd0000 },

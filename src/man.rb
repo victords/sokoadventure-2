@@ -63,16 +63,6 @@ class Man < GameObject
   def check_move(dir, objects, tiles)
     return if @moving == 1
 
-    if (xit = objects[@col][@row].find { |o| o.is_a?(Exit) })
-      if dir == 0 && @row == 0 ||
-        dir == 1 && @col == SCREEN_COLS - 1 ||
-        dir == 2 && @row == SCREEN_ROWS - 1 ||
-        dir == 3 && @col == 0
-        xit.activate
-        return
-      end
-    end
-
     x_var, y_var, col, row, n_col, n_row =
       case dir
       when 0 then [0, -Game.tile_size, @col, @row - 1, @col, @row - 2]
@@ -80,6 +70,17 @@ class Man < GameObject
       when 2 then [0, Game.tile_size, @col, @row + 1, @col, @row + 2]
       else        [-Game.tile_size, 0, @col - 1, @row, @col - 2, @row]
       end
+
+    if (xit = objects[@col][@row].find { |o| o.is_a?(Exit) })
+      if dir == 0 && @row == 0 ||
+        dir == 1 && @col == SCREEN_COLS - 1 ||
+        dir == 2 && @row == SCREEN_ROWS - 1 ||
+        dir == 3 && @col == 0
+        xit.activate
+        start_move(dir, x_var, y_var)
+        return
+      end
+    end
     return set_dir(dir) if col < 0 || row < 0 || col >= SCREEN_COLS || row >= SCREEN_ROWS
     return set_dir(dir) if tiles[col][row][:type] == :hole
 
@@ -121,15 +122,19 @@ class Man < GameObject
     if blocked
       set_dir(dir)
     else
-      @dust.start if @moving == 0
-      prev_dir = @dir
-      start_move(dir, Vector.new(@x + x_var, @y + y_var))
-      base = animation_base
-      set_animation(@pushing ? base + 8 : base) if dir != prev_dir
+      start_move(dir, x_var, y_var)
     end
   end
 
-  def update(objects, tiles)
+  def start_move(dir, x_var, y_var)
+    @dust.start if @moving == 0
+    prev_dir = @dir
+    super(dir, Vector.new(@x + x_var, @y + y_var))
+    base = animation_base
+    set_animation(@pushing ? base + 8 : base) if dir != prev_dir
+  end
+
+  def update(objects, tiles, active)
     base = animation_base
     if @moving == 1
       indices = @pushing ?
@@ -155,13 +160,13 @@ class Man < GameObject
     end
 
     @pushing = false unless @moving == 1
-    if KB.key_down?(Gosu::KB_UP)
+    if active && KB.key_down?(Gosu::KB_UP)
       check_move(0, objects, tiles)
-    elsif KB.key_down?(Gosu::KB_RIGHT)
+    elsif active && KB.key_down?(Gosu::KB_RIGHT)
       check_move(1, objects, tiles)
-    elsif KB.key_down?(Gosu::KB_DOWN)
+    elsif active && KB.key_down?(Gosu::KB_DOWN)
       check_move(2, objects, tiles)
-    elsif KB.key_down?(Gosu::KB_LEFT)
+    elsif active && KB.key_down?(Gosu::KB_LEFT)
       check_move(3, objects, tiles)
     elsif @moving == 2
       @moving = 0

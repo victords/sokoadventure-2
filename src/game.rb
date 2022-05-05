@@ -34,19 +34,44 @@ class Game
       load_screen(1)
     end
 
-    def load_screen(id, entrance_id = 0)
+    def load_screen(id, entrance_id = 0, transition = false)
       screen = @screens[id] || Screen.new(id)
       @screens[id] ||= screen
-      @controller = screen.reset(entrance_id)
+      if transition
+        @controller.active = false
+        transition_screens(screen.reset(entrance_id))
+      else
+        @controller = screen.reset(entrance_id)
+      end
+    end
+
+    def transition_screens(next_screen)
+      @transition_timer = 0
+      @on_transition_end = lambda do
+        @controller = next_screen
+      end
     end
 
     def update
       G.window.close if KB.key_pressed?(Gosu::KB_ESCAPE)
+
+      if @transition_timer
+        @transition_timer += 1
+        if @transition_timer == 60
+          @on_transition_end.call
+        elsif @transition_timer == 120
+          @transition_timer = nil
+        end
+      end
       @controller.update
     end
 
     def draw
       @controller.draw
+      return unless @transition_timer
+
+      alpha = ((@transition_timer >= 60 ? 120 - @transition_timer : @transition_timer).to_f / 60 * 255).round
+      Gosu.draw_rect(0, 0, @window_size.x, @window_size.y, alpha << 24, TRANSITION_Z_INDEX)
     end
   end
 end

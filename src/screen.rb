@@ -16,6 +16,8 @@ class Screen
   OVERLAY_HOLE_INDEX = 6
   OVERLAY_PATH_INDEX = 7
 
+  attr_accessor :active
+
   def initialize(id)
     tile_codes = Array.new(SCREEN_COLS) do
       Array.new(SCREEN_ROWS)
@@ -104,8 +106,10 @@ class Screen
   end
 
   def reset(entrance_id)
-    col, row = @entrances[entrance_id]
+    col, row, dir = @entrances[entrance_id]
     @man = Man.new(Game.screen_margin.x + col * Game.tile_size, Game.screen_margin.y + row * Game.tile_size, col, row)
+    @man.set_dir(dir)
+    @active = true
 
     self
   end
@@ -168,12 +172,11 @@ class Screen
   end
 
   def on_exit(xit)
-    puts "#{xit.dest_screen}, #{xit.dest_entrance}"
-    Game.load_screen(xit.dest_screen, xit.dest_entrance)
+    Game.load_screen(xit.dest_screen, xit.dest_entrance, true)
   end
 
   def update
-    @man.update(@objects, @tiles)
+    @man.update(@objects, @tiles, @active)
     @objects.each_with_index do |col, i|
       col.each_with_index do |cell, j|
         cell.reverse_each do |obj|
@@ -190,8 +193,6 @@ class Screen
       e.update
       @ui_elements.delete(e) if e.dead
     end
-
-    Game.load_screen(@id == '1' ? '2' : '1') if KB.key_pressed?(Gosu::KB_A)
   end
 
   def draw
