@@ -5,6 +5,7 @@ class Particles
   DEFAULT_OPTIONS = {
     color: 0xffffff,
     emission_interval: 60,
+    emission_rate: 1,
     duration: 60,
     spread: 0,
     alpha_inflection: 0.5
@@ -51,6 +52,10 @@ class Particles
     @timer = 0
   end
 
+  def element_count
+    @elements.size
+  end
+
   def update
     @elements.reverse_each do |e|
       e.update
@@ -61,16 +66,18 @@ class Particles
 
     @timer += 1
     if @timer >= @emission_time
-      x = @options[:area] ? @x + rand * @options[:area].x * Game.scale : @x + @options[:spread] * (rand - 0.5) * Game.scale
-      y = @options[:area] ? @y + rand * @options[:area].y * Game.scale : @y + @options[:spread] * (rand - 0.5) * Game.scale
-      @elements << (e = Particle.new(x, y, "fx_#{@type}", @sprite_cols, @sprite_rows, @options[:duration] / @indices.size, @indices, @options[:flip]))
-      if @options[:move]
-        d_x = @options[:move][0].is_a?(Range) ? rand(@options[:move][0]) : @options[:move][0]
-        e.speed.x = d_x.to_f / @options[:duration] * Game.scale
-        d_y = @options[:move][1].is_a?(Range) ? rand(@options[:move][1]) : @options[:move][1]
-        e.speed.y = d_y.to_f / @options[:duration] * Game.scale
+      @options[:emission_rate].times do
+        x = @options[:area] ? @x + rand * @options[:area].x * Game.scale : @x + @options[:spread] * (rand - 0.5) * Game.scale
+        y = @options[:area] ? @y + rand * @options[:area].y * Game.scale : @y + @options[:spread] * (rand - 0.5) * Game.scale
+        @elements << (e = Particle.new(x, y, "fx_#{@type}", @sprite_cols, @sprite_rows, @options[:duration] / @indices.size, @indices, @options[:flip]))
+        if @options[:move]
+          d_x = @options[:move][0].is_a?(Range) ? rand(@options[:move][0]) : @options[:move][0]
+          e.speed.x = d_x.to_f / @options[:duration] * Game.scale
+          d_y = @options[:move][1].is_a?(Range) ? rand(@options[:move][1]) : @options[:move][1]
+          e.speed.y = d_y.to_f / @options[:duration] * Game.scale
+        end
+        e.angle = @options[:angle]
       end
-      e.angle = @options[:angle]
       @timer = 0
       set_emission_time
     end

@@ -5,6 +5,7 @@ require_relative 'wall'
 require_relative 'ball'
 require_relative 'key'
 require_relative 'ui/item_panel'
+require_relative 'ui/item_get_effect'
 
 include MiniGL
 
@@ -47,8 +48,12 @@ class Screen
                     end
         next unless obj_class
 
-        @objects[i][j] << obj_class.new(Game.screen_margin.x + i * Game.tile_size,
-                                        Game.screen_margin.y + j * Game.tile_size, i, j, code)
+        obj = obj_class.new(Game.screen_margin.x + i * Game.tile_size,
+                            Game.screen_margin.y + j * Game.tile_size, i, j, code)
+        @objects[i][j] << obj
+        if obj.is_a?(Key)
+          obj.on_take = method(:on_item_take)
+        end
       end
     end
 
@@ -75,15 +80,7 @@ class Screen
     end
 
     @man = Man.new(Game.screen_margin.x, Game.screen_margin.y, 0, 0)
-
     @ui_elements = []
-    Game.stats.on_item_added << lambda do |type|
-      if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
-        e.refresh
-      else
-        @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
-      end
-    end
   end
 
   def get_tile(tile_codes, i, j)
@@ -131,6 +128,16 @@ class Screen
       tile = 16
     end
     hole ? { type: :hole, index: tile + 16 } : { type: :path, index: tile }
+  end
+
+  def on_item_take(type, x, y)
+    Game.stats.add_item(type)
+    if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
+      e.refresh
+    else
+      @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
+    end
+    @ui_elements << ItemGetEffect.new(type, x, y)
   end
 
   def update

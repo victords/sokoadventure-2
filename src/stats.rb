@@ -1,16 +1,13 @@
 class Stats
-  attr_reader :items, :on_item_added
+  attr_reader :items
 
   def initialize
     @items = {}
-    @on_item_added = []
   end
 
   def add_item(type)
-    key = type.to_sym
+    key = type
     @items[key] ||= 0
     @items[key] += 1
-
-    @on_item_added.each { |c| c.call(key) }
   end
 end

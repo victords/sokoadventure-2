@@ -15,12 +15,8 @@ class ItemPanel
     @timer = 0
     @alpha = 255
 
-    @icon, @icon_color = case item_type
-                         when :key_k then [Res.img(:ui_iconKey), 0xdd0000]
-                         when :key_l then [Res.img(:ui_iconKey), 0x1133ff]
-                         when :key_m then [Res.img(:ui_iconKey), 0xf6ca13]
-                         when :key_n then [Res.img(:ui_iconKey), 0x009911]
-                         end
+    @icon = Res.img("ui_icon#{ITEM_UI_ATTRS[item_type][:icon]}")
+    @icon_color = ITEM_UI_ATTRS[item_type][:color]
   end
 
   def refresh

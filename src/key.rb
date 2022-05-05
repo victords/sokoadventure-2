@@ -5,6 +5,8 @@ class Key < GameObject
   OFFSET_SPEED = 4
   OFFSET_RANGE = 5
 
+  attr_writer :on_take
+
   def initialize(x, y, col, row, arg)
     super(x, y, col, row, :sprite_key1, Vector.new(20, -60), 7, 1)
     @start_y = y
@@ -14,7 +16,7 @@ class Key < GameObject
                              y: @y + @img_gap.y + @h / 2,
                              spread: 80,
                              duration: 30).start
-    @type = "key_#{arg}"
+    @type = "key_#{arg}".to_sym
     @color = case arg
              when 'k' then 0xdd0000
              when 'l' then 0x1133ff
@@ -25,7 +27,7 @@ class Key < GameObject
 
   def take
     @dead = true
-    Game.stats.add_item(@type)
+    @on_take&.call(@type, @x, @y)
   end
 
   def update

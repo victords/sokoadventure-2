@@ -104,7 +104,7 @@ class Man < GameObject
         end
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       when Key
-        @on_move_end = lambda { obj.take }
+        @on_move_end = -> { obj.take }
       end
     end
 
