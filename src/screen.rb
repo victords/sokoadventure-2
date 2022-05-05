@@ -1,4 +1,5 @@
 require 'minigl'
+require_relative 'exit'
 require_relative 'man'
 require_relative 'box'
 require_relative 'wall'
@@ -15,26 +16,45 @@ class Screen
   OVERLAY_HOLE_INDEX = 6
   OVERLAY_PATH_INDEX = 7
 
-  def initialize
-    @tileset = Res.tileset('1', BASE_TILE_SIZE, BASE_TILE_SIZE)
+  def initialize(id)
     tile_codes = Array.new(SCREEN_COLS) do
       Array.new(SCREEN_ROWS)
     end
-    File.open("#{Res.prefix}screen/1") do |f|
-      f.each.with_index do |line, j|
+    @entrances = []
+    @objects = Array.new(SCREEN_COLS) do
+      Array.new(SCREEN_ROWS) do
+        []
+      end
+    end
+
+    File.open("#{Res.prefix}screen/#{id}") do |f|
+      metadata = true
+      j = 0
+      f.each do |line|
+        next metadata = false if line[0] == '%'
+
+        if metadata
+          data = line.chomp.split(':')
+          case data[0]
+          when 'e'
+            @entrances << data[1].split(',').map(&:to_i)
+          when 'x'
+            args = data[1].split(',').map(&:to_i)
+            @objects[args[0]][args[1]] << (xit = Exit.new(args[2], args[3]))
+            xit.on_activate = method(:on_exit)
+          end
+          next
+        end
+
         line.chomp.each_char.with_index do |c, i|
           tile_codes[i][j] = c
         end
+        j += 1
       end
     end
 
     @tiles = Array.new(SCREEN_COLS) do
       Array.new(SCREEN_ROWS)
-    end
-    @objects = Array.new(SCREEN_COLS) do
-      Array.new(SCREEN_ROWS) do
-        []
-      end
     end
     (0...SCREEN_COLS).each do |i|
       (0...SCREEN_ROWS).each do |j|
@@ -79,8 +99,15 @@ class Screen
       end
     end
 
-    @man = Man.new(Game.screen_margin.x, Game.screen_margin.y, 0, 0)
+    @tileset = Res.tileset('1', BASE_TILE_SIZE, BASE_TILE_SIZE)
     @ui_elements = []
+  end
+
+  def reset(entrance_id)
+    col, row = @entrances[entrance_id]
+    @man = Man.new(Game.screen_margin.x + col * Game.tile_size, Game.screen_margin.y + row * Game.tile_size, col, row)
+
+    self
   end
 
   def get_tile(tile_codes, i, j)
@@ -140,6 +167,11 @@ class Screen
     @ui_elements << ItemGetEffect.new(type, x, y)
   end
 
+  def on_exit(xit)
+    puts "#{xit.dest_screen}, #{xit.dest_entrance}"
+    Game.load_screen(xit.dest_screen, xit.dest_entrance)
+  end
+
   def update
     @man.update(@objects, @tiles)
     @objects.each_with_index do |col, i|
@@ -158,6 +190,8 @@ class Screen
       e.update
       @ui_elements.delete(e) if e.dead
     end
+
+    Game.load_screen(@id == '1' ? '2' : '1') if KB.key_pressed?(Gosu::KB_A)
   end
 
   def draw

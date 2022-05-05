@@ -63,6 +63,16 @@ class Man < GameObject
   def check_move(dir, objects, tiles)
     return if @moving == 1
 
+    if (xit = objects[@col][@row].find { |o| o.is_a?(Exit) })
+      if dir == 0 && @row == 0 ||
+        dir == 1 && @col == SCREEN_COLS - 1 ||
+        dir == 2 && @row == SCREEN_ROWS - 1 ||
+        dir == 3 && @col == 0
+        xit.activate
+        return
+      end
+    end
+
     x_var, y_var, col, row, n_col, n_row =
       case dir
       when 0 then [0, -Game.tile_size, @col, @row - 1, @col, @row - 2]

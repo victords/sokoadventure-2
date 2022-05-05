@@ -25,12 +25,19 @@ class Game
                                   (@window_size.y - @tile_size * SCREEN_ROWS) / 2)
 
       @stats = Stats.new
+      @screens = {}
     end
 
     def start
       @font = TextHelper.new(Res.font(:font, 96), 0, @scale, @scale)
 
-      @controller = Screen.new
+      load_screen(1)
+    end
+
+    def load_screen(id, entrance_id = 0)
+      screen = @screens[id] || Screen.new(id)
+      @screens[id] ||= screen
+      @controller = screen.reset(entrance_id)
     end
 
     def update
