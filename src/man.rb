@@ -117,6 +117,8 @@ class Man < GameObject
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       when Key
         @on_move_end = -> { obj.take }
+      when LedPanelButton
+        @on_move_end = -> { obj.activate }
       end
     end
 

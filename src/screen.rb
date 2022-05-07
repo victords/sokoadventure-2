@@ -5,6 +5,7 @@ require_relative 'box'
 require_relative 'wall'
 require_relative 'ball'
 require_relative 'key'
+require_relative 'led_panel'
 require_relative 'ui/item_panel'
 require_relative 'ui/item_get_effect'
 
@@ -30,20 +31,33 @@ class Screen
     end
 
     File.open("#{Res.prefix}screen/#{id}") do |f|
-      metadata = true
+      header = true
       j = 0
       f.each do |line|
-        next metadata = false if line[0] == '%'
+        next header = false if line[0] == '%'
 
-        if metadata
+        if header
           data = line.chomp.split(':')
+          args = data[1].split(',').map(&:to_i)
           case data[0]
           when 'e'
-            @entrances << data[1].split(',').map(&:to_i)
+            @entrances << args
           when 'x'
-            args = data[1].split(',').map(&:to_i)
             @objects[args[0]][args[1]] << (xit = Exit.new(args[2], args[3]))
             xit.on_activate = method(:on_exit)
+          when 'led'
+            x = Game.screen_margin.x + args[0] * Game.tile_size
+            y = Game.screen_margin.y + args[1] * Game.tile_size
+            panel = LedPanel.new(x, y)
+            @objects[args[0]][args[1]] << panel
+            (0..2).each do |i|
+              @objects[args[0] + i][args[1] - 1] << LedPanelButton.new(x + i * Game.tile_size, y - Game.tile_size, panel, i, 2)
+              @objects[args[0] + i][args[1] + 3] << LedPanelButton.new(x + i * Game.tile_size, y + 3 * Game.tile_size, panel, i, 0)
+            end
+            (0..2).each do |j|
+              @objects[args[0] - 1][args[1] + j] << LedPanelButton.new(x - Game.tile_size, y + j * Game.tile_size, panel, j, 1)
+              @objects[args[0] + 3][args[1] + j] << LedPanelButton.new(x + 3 * Game.tile_size, y + j * Game.tile_size, panel, j, 3)
+            end
           end
           next
         end
