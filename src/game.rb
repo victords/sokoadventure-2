@@ -57,9 +57,9 @@ class Game
 
       if @transition_timer
         @transition_timer += 1
-        if @transition_timer == 60
+        if @transition_timer == 30
           @on_transition_end.call
-        elsif @transition_timer == 120
+        elsif @transition_timer == 60
           @transition_timer = nil
         end
       end
@@ -70,7 +70,7 @@ class Game
       @controller.draw
       return unless @transition_timer
 
-      alpha = ((@transition_timer >= 60 ? 120 - @transition_timer : @transition_timer).to_f / 60 * 255).round
+      alpha = ((@transition_timer >= 30 ? 60 - @transition_timer : @transition_timer).to_f / 30 * 255).round
       Gosu.draw_rect(0, 0, @window_size.x, @window_size.y, alpha << 24, TRANSITION_Z_INDEX)
     end
   end

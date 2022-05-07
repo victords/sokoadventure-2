@@ -52,6 +52,7 @@ class Man < GameObject
   end
 
   def start_push(dir)
+    set_animation(animation_base + 8)
     @pushing = true
     @sweat[dir].start
   end
@@ -84,7 +85,7 @@ class Man < GameObject
     return set_dir(dir) if col < 0 || row < 0 || col >= SCREEN_COLS || row >= SCREEN_ROWS
     return set_dir(dir) if tiles[col][row][:type] == :hole
 
-    blocked = false
+    blocked = pushing = false
     objects[col][row].each do |obj|
       break blocked = true if obj.is_a?(Wall)
 
@@ -93,7 +94,7 @@ class Man < GameObject
         next if obj.fallen
         break blocked = true if obj.falling
 
-        start_push(dir)
+        pushing = true
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
         break blocked = true if objects[n_col][n_row].any? { |o| blocking?(o) }
 
@@ -102,7 +103,7 @@ class Man < GameObject
         obj.prepare_fall(tiles[n_col][n_row][:index]) if tiles[n_col][n_row][:type] == :hole
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       when Ball
-        start_push(dir)
+        pushing = true
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
         break blocked = true if tiles[n_col][n_row][:type] == :hole || objects[n_col][n_row].any? { |o| blocking?(o) }
 
@@ -119,6 +120,11 @@ class Man < GameObject
       end
     end
 
+    if pushing
+      start_push(dir) unless @pushing
+    else
+      @pushing = false
+    end
     if blocked
       set_dir(dir)
     else
@@ -159,7 +165,6 @@ class Man < GameObject
       @sweat[@dir].move(@x + @w / 2, @y + @img_gap.y + 10 * Game.scale)
     end
 
-    @pushing = false unless @moving == 1
     if active && KB.key_down?(Gosu::KB_UP)
       check_move(0, objects, tiles)
     elsif active && KB.key_down?(Gosu::KB_RIGHT)
@@ -170,6 +175,7 @@ class Man < GameObject
       check_move(3, objects, tiles)
     elsif @moving == 2
       @moving = 0
+      @pushing = false
       @dust.stop
     end
 
