@@ -2,6 +2,9 @@ require_relative 'game'
 require_relative 'game_object'
 
 class LedPanel
+  TRANSITION_TIME = 15
+  TRANSITION_PAUSE = 12
+
   attr_reader :x, :y
 
   def initialize(x, y)
@@ -54,13 +57,16 @@ class LedPanel
     @on_transition_end = block
   end
 
-  def saturate(color, rate)
-    r = (color & 0xff0000) >> 16
-    g = (color & 0xff00) >> 8
-    b = color & 0xff
-    r = (rate * r).round
-    g = (rate * g).round
-    b = (rate * b).round
+  def color_lerp(color1, color2, rate)
+    r1 = (color1 & 0xff0000) >> 16
+    g1 = (color1 & 0xff00) >> 8
+    b1 = color1 & 0xff
+    r2 = (color2 & 0xff0000) >> 16
+    g2 = (color2 & 0xff00) >> 8
+    b2 = color2 & 0xff
+    r = (r1 + rate * (r2 - r1)).round
+    g = (g1 + rate * (g2 - g1)).round
+    b = (b1 + rate * (b2 - b1)).round
     (0xff << 24) | (r << 16) | (g << 8) | b
   end
 
@@ -70,10 +76,10 @@ class LedPanel
     return unless @timer
 
     @timer += 1
-    if @timer == 15
+    if @timer == TRANSITION_TIME
       @on_transition_end.call
       @on_transition_end = nil
-    elsif @timer == 30
+    elsif @timer == 2 * TRANSITION_TIME + TRANSITION_PAUSE
       @transition_leds = @timer = nil
     end
   end
@@ -89,9 +95,11 @@ class LedPanel
                 end
         led_color = glow_color = color
         if @transition_leds&.include?([i, j])
-          rate = (@timer >= 15 ? @timer - 15 : 15 - @timer).to_f / 15
-          led_color = saturate(led_color, rate)
-          glow_color = ((rate * 255).round << 24) | (glow_color & 0xffffff)
+          rate = (@timer >= TRANSITION_TIME + TRANSITION_PAUSE ?
+                    2 * TRANSITION_TIME + TRANSITION_PAUSE - @timer :
+                    [@timer, TRANSITION_TIME].min).to_f / TRANSITION_TIME
+          led_color = color_lerp(led_color, 0xff666666, rate)
+          glow_color = ((255 * (1 - rate)).round << 24) | (glow_color & 0xffffff)
         end
         @img[0].draw(@x + i * Game.tile_size, @y + j * Game.tile_size, z_index + j, Game.scale, Game.scale, led_color)
         @img[1].draw(@x + i * Game.tile_size, @y + j * Game.tile_size, z_index + j, Game.scale, Game.scale, glow_color)
@@ -102,10 +110,11 @@ end
 
 class LedPanelButton < MiniGL::Sprite
   def initialize(x, y, panel, line, dir)
-    super(x, y, :sprite_ledPanelButton, 1, 1)
+    super(x, y, :sprite_ledPanelButton, 4, 2)
     @panel = panel
     @line = line
     @dir = dir
+    @img_index = dir
   end
 
   def activate
@@ -114,6 +123,11 @@ class LedPanelButton < MiniGL::Sprite
     else
       @panel.move_row(@line, @dir == 3)
     end
+    @img_index = @dir + 4
+  end
+
+  def reset
+    @img_index = @dir
   end
 
   def dead; false; end
@@ -121,6 +135,6 @@ class LedPanelButton < MiniGL::Sprite
   def update; end
 
   def draw(z_index)
-    super(nil, Game.scale, Game.scale, 255, 0xffffff, @dir * 90, nil, z_index)
+    super(nil, Game.scale, Game.scale, 255, 0xffffff, nil, nil, z_index)
   end
 end

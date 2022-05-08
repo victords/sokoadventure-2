@@ -130,6 +130,9 @@ class Man < GameObject
     if blocked
       set_dir(dir)
     else
+      if (button = objects[@col][@row].find { |obj| obj.is_a?(LedPanelButton) })
+        button.reset
+      end
       start_move(dir, x_var, y_var)
     end
   end
