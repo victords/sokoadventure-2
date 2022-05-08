@@ -47,6 +47,8 @@ class LedPanel
   end
 
   def transition(col = nil, row = nil, &block)
+    return if @timer
+
     @timer = 0
     @transition_leds =
       if col

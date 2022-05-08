@@ -115,10 +115,6 @@ class Man < GameObject
           obj.unset
         end
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
-      when Key
-        @on_move_end = -> { obj.take }
-      when LedPanelButton
-        @on_move_end = -> { obj.activate }
       end
     end
 
@@ -182,6 +178,16 @@ class Man < GameObject
       @moving = 0
       @pushing = false
       @dust.stop
+    end
+
+    if @moving == 0
+      objs = objects[@col][@row]
+      objs.each do |obj|
+        case obj
+        when Key, LedPanelButton
+          obj.activate
+        end
+      end
     end
 
     unless @pushing

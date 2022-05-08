@@ -25,7 +25,7 @@ class Key < GameObject
              end
   end
 
-  def take
+  def activate
     @dead = true
     @on_take&.call(@type, @x, @y)
   end
