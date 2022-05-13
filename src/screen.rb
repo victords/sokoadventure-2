@@ -5,6 +5,7 @@ require_relative 'box'
 require_relative 'wall'
 require_relative 'ball'
 require_relative 'key'
+require_relative 'door'
 require_relative 'led_panel'
 require_relative 'ui/item_panel'
 require_relative 'ui/item_get_effect'
@@ -81,6 +82,7 @@ class Screen
                     when 'x'     then Box
                     when '#'     then Wall
                     when /[k-n]/ then Key
+                    when /[K-N]/ then Door
                     end
         next unless obj_class
 
