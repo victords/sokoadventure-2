@@ -16,6 +16,10 @@ class Box < GameObject
     end
   end
 
+  def blocking?
+    !@fallen
+  end
+
   def prepare_fall(tile_index)
     @falling = 0
     base = case tile_index

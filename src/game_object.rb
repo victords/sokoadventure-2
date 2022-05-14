@@ -50,6 +50,10 @@ class GameObject < MiniGL::GameObject
     end
   end
 
+  def blocking?
+    false
+  end
+
   def update
     if @moving == 1
       move

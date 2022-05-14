@@ -57,10 +57,6 @@ class Man < GameObject
     @sweat[dir].start
   end
 
-  def blocking?(obj)
-    obj.is_a?(Wall) || obj.is_a?(Ball) || obj.is_a?(Box) && !obj.fallen
-  end
-
   def check_move(dir, objects, tiles)
     return if @moving == 1
 
@@ -87,7 +83,7 @@ class Man < GameObject
 
     blocked = pushing = false
     objects[col][row].each do |obj|
-      break blocked = true if obj.is_a?(Wall)
+      break blocked = true if obj.is_a?(Wall) || obj.is_a?(Door) && obj.blocking?
 
       case obj
       when Box
@@ -96,7 +92,7 @@ class Man < GameObject
 
         pushing = true
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
-        break blocked = true if objects[n_col][n_row].any? { |o| blocking?(o) }
+        break blocked = true if objects[n_col][n_row].any?(&:blocking?)
 
         objects[n_col][n_row] << obj
         objects[col][row].delete(obj)
@@ -105,7 +101,7 @@ class Man < GameObject
       when Ball
         pushing = true
         break blocked = true if n_col < 0 || n_row < 0 || n_col >= SCREEN_COLS || n_row >= SCREEN_ROWS
-        break blocked = true if tiles[n_col][n_row][:type] == :hole || objects[n_col][n_row].any? { |o| blocking?(o) }
+        break blocked = true if tiles[n_col][n_row][:type] == :hole || objects[n_col][n_row].any?(&:blocking?)
 
         objects[n_col][n_row] << obj
         objects[col][row].delete(obj)
@@ -115,6 +111,8 @@ class Man < GameObject
           obj.unset
         end
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
+      when Key, LedPanelButton
+        @on_move_end = -> { obj.activate }
       end
     end
 
@@ -142,6 +140,16 @@ class Man < GameObject
   end
 
   def update(objects, tiles, active)
+    if @moving == 0
+      objs = objects[@col][@row]
+      objs.each do |obj|
+        case obj
+        when Key, LedPanelButton
+          obj.activate
+        end
+      end
+    end
+
     base = animation_base
     if @moving == 1
       indices = @pushing ?
@@ -178,16 +186,6 @@ class Man < GameObject
       @moving = 0
       @pushing = false
       @dust.stop
-    end
-
-    if @moving == 0
-      objs = objects[@col][@row]
-      objs.each do |obj|
-        case obj
-        when Key, LedPanelButton
-          obj.activate
-        end
-      end
     end
 
     unless @pushing

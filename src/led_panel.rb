@@ -47,9 +47,12 @@ class LedPanel
   end
 
   def transition(col = nil, row = nil, &block)
-    return if @timer
+    return if col == @transition_col && !col.nil? ||
+              row == @transition_row && !row.nil?
 
     @timer = 0
+    @transition_col = col
+    @transition_row = row
     @transition_leds =
       if col
         [[col, 0], [col, 1], [col, 2]]
@@ -72,17 +75,23 @@ class LedPanel
     (0xff << 24) | (r << 16) | (g << 8) | b
   end
 
-  def dead; false; end
+  def dead
+    false
+  end
+
+  def blocking?
+    false
+  end
 
   def update
-    return unless @timer
+    return unless @transition_leds
 
     @timer += 1
     if @timer == TRANSITION_TIME
       @on_transition_end.call
       @on_transition_end = nil
     elsif @timer == 2 * TRANSITION_TIME + TRANSITION_PAUSE
-      @transition_leds = @timer = nil
+      @transition_leds = @transition_col = @transition_row = nil
     end
   end
 
@@ -132,7 +141,13 @@ class LedPanelButton < MiniGL::Sprite
     @img_index = @dir
   end
 
-  def dead; false; end
+  def dead
+    false
+  end
+
+  def blocking?
+    false
+  end
 
   def update; end
 

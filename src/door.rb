@@ -11,8 +11,12 @@ class Door < GameObject
              end
   end
 
+  def blocking?
+    !@open
+  end
+
   def update
-    animate([0, 1, 2, 3, 4, 3, 2, 1], 15)
+
   end
 
   def draw(z_index)

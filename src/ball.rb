@@ -7,6 +7,10 @@ class Ball < GameObject
     @glow_alpha = 0
   end
 
+  def blocking?
+    true
+  end
+
   def prepare_set
     @will_set = true
   end
