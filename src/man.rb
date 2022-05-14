@@ -83,7 +83,7 @@ class Man < GameObject
 
     blocked = pushing = false
     objects[col][row].each do |obj|
-      break blocked = true if obj.is_a?(Wall) || obj.is_a?(Door) && obj.blocking?
+      break blocked = true if obj.is_a?(Wall)
 
       case obj
       when Box
@@ -113,6 +113,8 @@ class Man < GameObject
         obj.start_move(dir, Vector.new(obj.x + x_var, obj.y + y_var))
       when Key, LedPanelButton
         @on_move_end = -> { obj.activate }
+      when Door
+        break blocked = true unless obj.open
       end
     end
 

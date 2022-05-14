@@ -89,9 +89,6 @@ class Screen
         obj = obj_class.new(Game.screen_margin.x + i * Game.tile_size,
                             Game.screen_margin.y + j * Game.tile_size, i, j, code)
         @objects[i][j] << obj
-        if obj.is_a?(Key)
-          obj.on_take = method(:on_item_take)
-        end
       end
     end
 
@@ -119,6 +116,9 @@ class Screen
 
     @tileset = Res.tileset('1', BASE_TILE_SIZE, BASE_TILE_SIZE)
     @ui_elements = []
+
+    Game.stats.on_add_item << method(:on_add_item)
+    Game.stats.on_use_item << method(:on_use_item)
   end
 
   def reset(entrance_id)
@@ -177,14 +177,21 @@ class Screen
     hole ? { type: :hole, index: tile + 16 } : { type: :path, index: tile }
   end
 
-  def on_item_take(type, x, y)
-    Game.stats.add_item(type)
+  def on_add_item(type, x, y)
     if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
       e.refresh
     else
       @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
     end
     @ui_elements << ItemGetEffect.new(type, x, y)
+  end
+
+  def on_use_item(type)
+    if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
+      e.refresh
+    else
+      @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
+    end
   end
 
   def on_exit(xit)

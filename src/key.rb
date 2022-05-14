@@ -27,7 +27,7 @@ class Key < GameObject
 
   def activate
     @dead = true
-    @on_take&.call(@type, @x, @y)
+    Game.stats.add_item(@type, @x, @y)
   end
 
   def update

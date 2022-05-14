@@ -51,6 +51,6 @@ class ItemPanel
   def draw
     @img.draw(@x, @y, UI_Z_INDEX, Game.scale, Game.scale, (@alpha << 24) | 0xffffff)
     @icon.draw(@x + 40 * Game.scale, @y + 40 * Game.scale, UI_Z_INDEX, Game.scale, Game.scale, (@alpha << 24) | @icon_color)
-    Game.font.write_line(Game.stats.items[@item_type].to_s, @x + (@img.width - 40) * Game.scale, @y + 52 * Game.scale, :right, 0xffffff, @alpha, nil, 0, 0, 0, UI_Z_INDEX)
+    Game.font.write_line((Game.stats.items[@item_type] || 0).to_s, @x + (@img.width - 40) * Game.scale, @y + 52 * Game.scale, :right, 0xffffff, @alpha, nil, 0, 0, 0, UI_Z_INDEX)
   end
 end
