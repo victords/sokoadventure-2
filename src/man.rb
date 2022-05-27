@@ -197,7 +197,7 @@ class Man < GameObject
       check_move(2, objects, tiles)
     elsif active && KB.key_down?(Gosu::KB_LEFT)
       check_move(3, objects, tiles)
-    elsif @moving == 2
+    elsif @moving != 1
       @moving = 0
       @pushing = false
       @dust.stop

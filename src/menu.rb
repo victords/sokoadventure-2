@@ -15,6 +15,7 @@ class Menu
 
   def draw
     G.window.clear(0xabcdef)
-    Game.font.write_line('SokoAdventure 2', 50, 50, :left, 0xffffff, 255, :border, 0, 4 * Game.scale, 255, 0, 4 * Game.scale, 4 * Game.scale)
+    Game.font.write_line('SokoAdventure 2', Game.window_size.x / 2, Game.window_size.y / 2 - 2 * Game.scale * 96,
+                         :center, 0xffffff, 255, :border, 0, 4 * Game.scale, 255, 0, 4 * Game.scale, 4 * Game.scale)
   end
 end
