@@ -30,12 +30,12 @@ class Ball < GameObject
     return if !@set && @glow_alpha == 0
 
     if @set || @glow_alpha < 0
-      @glow_alpha += 2
+      @glow_alpha += 5
     else
-      @glow_alpha -= 2
+      @glow_alpha -= 5
     end
-    if @glow_alpha >= 130
-      @glow_alpha = -130
+    if @glow_alpha >= 255
+      @glow_alpha = -255
     end
   end
 
