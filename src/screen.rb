@@ -93,7 +93,7 @@ class Screen
     end
 
     @tileset = Res.tileset('1', BASE_TILE_SIZE, BASE_TILE_SIZE)
-    @ui_elements = []
+    @effects = []
 
     Game.stats.on_add_item << method(:on_add_item)
     Game.stats.on_use_item << method(:on_use_item)
@@ -156,24 +156,32 @@ class Screen
   end
 
   def on_add_item(type, x, y)
-    if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
+    return unless @active
+
+    if (e = @effects.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
       e.refresh
     else
-      @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
+      @effects << ItemPanel.new(type) unless @effects.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
     end
-    @ui_elements << ItemGetEffect.new(type, x, y)
+    @effects << ItemGetEffect.new(type, x, y)
   end
 
   def on_use_item(type)
-    if (e = @ui_elements.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
+    return unless @active
+
+    if (e = @effects.find { |e| e.is_a?(ItemPanel) && e.item_type == type })
       e.refresh
     else
-      @ui_elements << ItemPanel.new(type) unless @ui_elements.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
+      @effects << ItemPanel.new(type) unless @effects.any? { |e| e.is_a?(ItemPanel) && e.item_type == type }
     end
   end
 
   def on_exit(xit)
     Game.load_screen(xit.dest_screen, xit.dest_entrance, true)
+  end
+
+  def clear_effects
+    @effects.clear
   end
 
   def update
@@ -190,9 +198,9 @@ class Screen
       end
     end
 
-    @ui_elements.reverse_each do |e|
+    @effects.reverse_each do |e|
       e.update
-      @ui_elements.delete(e) if e.dead
+      @effects.delete(e) if e.dead
     end
   end
 
@@ -216,11 +224,11 @@ class Screen
     end
 
     @objects.flatten.each do |obj|
-      obj.draw(2 + ((obj.y - margin.y) / Game.tile_size).ceil)
+      obj.draw(10 * (((obj.y - margin.y) / Game.tile_size).ceil + 1))
     end
-    @man.draw(2 + ((@man.y - margin.y) / Game.tile_size).ceil)
+    @man.draw(10 * (((@man.y - margin.y) / Game.tile_size).ceil + 1) + 9)
 
-    @ui_elements.each(&:draw)
+    @effects.each(&:draw)
 
     if margin.x > 0.01
       Gosu.draw_rect(0, 0, margin.x, Game.window_size.y, 0xff000000, UI_Z_INDEX + 100)

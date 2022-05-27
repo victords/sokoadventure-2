@@ -35,7 +35,7 @@ class Game
 
       @controller = Menu.new
     end
-    
+
     def load_game
       @controller.active = false
       @transition = Transition.new(:squares, -> { load_screen(1) })
@@ -44,12 +44,14 @@ class Game
     def load_screen(id, entrance_id = 0, transition = false)
       screen = @screens[id] || Screen.new(id)
       @screens[id] ||= screen
+      @controller.active = false
       if transition
-        @controller.active = false
         @transition = Transition.new(:fade, lambda do
+          @controller.clear_effects
           @controller = screen.reset(entrance_id)
         end)
       else
+        @controller.clear_effects
         @controller = screen.reset(entrance_id)
       end
     end

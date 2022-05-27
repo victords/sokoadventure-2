@@ -58,7 +58,7 @@ class Box < GameObject
   end
 
   def draw(z_index)
-    super
+    super(@fallen ? z_index : z_index + 1)
     @dust.each { |d| d.draw(z_index) }
   end
 end
