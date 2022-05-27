@@ -1,13 +1,10 @@
-require_relative 'game'
-require_relative 'game_object'
-
 class LedPanel
   TRANSITION_TIME = 15
   TRANSITION_PAUSE = 12
 
   attr_reader :x, :y
 
-  def initialize(x, y)
+  def initialize(x, y, objects, args)
     @x = x
     @y = y
     @leds = [
@@ -16,6 +13,13 @@ class LedPanel
       [:green, :red, :blue]
     ]
     @img = Res.imgs(:sprite_led, 2, 1)
+
+    (0..2).each do |i|
+      objects[args[0] + i][args[1] + 3] << LedPanelButton.new(x + i * Game.tile_size, y + 3 * Game.tile_size, self, i, 0)
+      objects[args[0] - 1][args[1] + i] << LedPanelButton.new(x - Game.tile_size, y + i * Game.tile_size, self, i, 1)
+      objects[args[0] + i][args[1] - 1] << LedPanelButton.new(x + i * Game.tile_size, y - Game.tile_size, self, i, 2)
+      objects[args[0] + 3][args[1] + i] << LedPanelButton.new(x + 3 * Game.tile_size, y + i * Game.tile_size, self, i, 3)
+    end
   end
 
   def move_col(col, up)

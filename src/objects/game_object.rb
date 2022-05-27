@@ -1,30 +1,17 @@
 require 'minigl'
-require_relative 'game'
+require_relative '../game'
 
 class GameObject < MiniGL::GameObject
-  attr_reader :col, :row, :moving, :dead
+  attr_reader :moving, :dead
 
-  def initialize(x, y, col, row, img, img_gap, sprite_cols = nil, sprite_rows = nil)
+  def initialize(x, y, img, img_gap, sprite_cols = nil, sprite_rows = nil)
     super(x, y, Game.tile_size, Game.tile_size, img, img_gap * Game.scale, sprite_cols, sprite_rows)
-    @col = col
-    @row = row
     @moving = 0
     @speed = MOVE_SPEED * Game.scale
   end
 
   def start_move(dir, dest)
     return if @moving == 1
-
-    case dir
-    when 0
-      @row -= 1
-    when 1
-      @col += 1
-    when 2
-      @row += 1
-    else
-      @col -= 1
-    end
 
     @dir = dir
     @dest = dest

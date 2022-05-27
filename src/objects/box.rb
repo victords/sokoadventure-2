@@ -1,11 +1,11 @@
 require_relative 'game_object'
-require_relative 'particles'
+require_relative '../particles'
 
 class Box < GameObject
   attr_reader :falling, :fallen
 
-  def initialize(x, y, col, row, _arg)
-    super(x, y, col, row, :sprite_box1, Vector.new(0, -80), 7, 3)
+  def initialize(x, y, _objects, _args)
+    super(x, y, :sprite_box1, Vector.new(0, -80), 7, 3)
     @dust = (0..3).map do |_|
       Particles.new(type: :dust,
                     color: 0xdddddd,

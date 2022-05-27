@@ -1,14 +1,14 @@
 require_relative 'game_object'
 
 class Door < GameObject
-  def initialize(x, y, col, row, arg)
-    super(x, y, col, row, :sprite_door1, Vector.new(-20, -28), 3, 2)
-    @key_type = "key_#{arg.downcase}".to_sym
-    @color = case arg
-             when 'K' then 0xdd0000
-             when 'L' then 0x1133ff
-             when 'M' then 0xf6ca13
-             when 'N' then 0x009911
+  def initialize(x, y, _objects, args)
+    super(x, y, :sprite_door1, Vector.new(-20, -28), 3, 2)
+    @key_type = "key_#{args[2]}".to_sym
+    @color = case args[2]
+             when 0 then 0xdd0000
+             when 1 then 0x1133ff
+             when 2 then 0xf6ca13
+             else        0x009911
              end
 
     @particles = (0..3).map do |i|

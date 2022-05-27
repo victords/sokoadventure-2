@@ -1,11 +1,13 @@
-require_relative 'game_object'
+require_relative 'objects/game_object'
 require_relative 'particles'
 
 class Man < GameObject
   attr_reader :dir
 
   def initialize(x, y, col, row)
-    super(x, y, col, row, :sprite_man, Vector.new(0, -50), 10, 3)
+    super(x, y, :sprite_man, Vector.new(0, -50), 10, 3)
+    @col = col
+    @row = row
     @dir = 2
     set_animation(animation_base)
 
@@ -139,10 +141,21 @@ class Man < GameObject
     super(dir, Vector.new(@x + x_var, @y + y_var))
     base = animation_base
     set_animation(@pushing ? base + 8 : base) if dir != prev_dir
+
+    case dir
+    when 0
+      @row -= 1
+    when 1
+      @col += 1
+    when 2
+      @row += 1
+    else
+      @col -= 1
+    end
   end
 
   def update(objects, tiles, active)
-    if @moving == 0
+    if @moving == 0 && @col >= 0 && @col < SCREEN_COLS && @row >= 0 && @row < SCREEN_ROWS
       objs = objects[@col][@row]
       objs.each do |obj|
         case obj

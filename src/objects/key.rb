@@ -1,5 +1,5 @@
 require_relative 'game_object'
-require_relative 'particles'
+require_relative '../particles'
 
 class Key < GameObject
   OFFSET_SPEED = 4
@@ -7,8 +7,8 @@ class Key < GameObject
 
   attr_writer :on_take
 
-  def initialize(x, y, col, row, arg)
-    super(x, y, col, row, :sprite_key1, Vector.new(20, -60), 7, 1)
+  def initialize(x, y, _objects, args)
+    super(x, y, :sprite_key1, Vector.new(20, -60), 7, 1)
     @start_y = y
     @offset = 0
     @sparkle = Particles.new(type: :sparkle,
@@ -16,12 +16,12 @@ class Key < GameObject
                              y: @y + @img_gap.y + @h / 2,
                              spread: 80,
                              duration: 30).start
-    @type = "key_#{arg}".to_sym
-    @color = case arg
-             when 'k' then 0xdd0000
-             when 'l' then 0x1133ff
-             when 'm' then 0xf6ca13
-             when 'n' then 0x009911
+    @type = "key_#{args[2]}".to_sym
+    @color = case args[2]
+             when 0 then 0xdd0000
+             when 1 then 0x1133ff
+             when 2 then 0xf6ca13
+             else        0x009911
              end
   end
 

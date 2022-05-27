@@ -11,10 +11,10 @@ UI_Z_INDEX = 1000
 TRANSITION_Z_INDEX = 2000
 
 ITEM_UI_ATTRS = {
-  key_k: { icon: :Key, color: 0xdd0000 },
-  key_l: { icon: :Key, color: 0x1133ff },
-  key_m: { icon: :Key, color: 0xf6ca13 },
-  key_n: { icon: :Key, color: 0x009911 },
+  key_0: { icon: :Key, color: 0xdd0000 },
+  key_1: { icon: :Key, color: 0x1133ff },
+  key_2: { icon: :Key, color: 0xf6ca13 },
+  key_3: { icon: :Key, color: 0x009911 },
 }.freeze
 
 Vector = MiniGL::Vector

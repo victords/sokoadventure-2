@@ -1,12 +1,7 @@
 require 'minigl'
 require_relative 'exit'
 require_relative 'man'
-require_relative 'box'
-require_relative 'wall'
-require_relative 'ball'
-require_relative 'key'
-require_relative 'door'
-require_relative 'led_panel'
+require_relative 'objects'
 require_relative 'ui/item_panel'
 require_relative 'ui/item_get_effect'
 
@@ -46,19 +41,11 @@ class Screen
           when 'x'
             @objects[args[0]][args[1]] << (xit = Exit.new(args[2], args[3]))
             xit.on_activate = method(:on_exit)
-          when 'led'
+          else
             x = Game.screen_margin.x + args[0] * Game.tile_size
             y = Game.screen_margin.y + args[1] * Game.tile_size
-            panel = LedPanel.new(x, y)
-            @objects[args[0]][args[1]] << panel
-            (0..2).each do |i|
-              @objects[args[0] + i][args[1] - 1] << LedPanelButton.new(x + i * Game.tile_size, y - Game.tile_size, panel, i, 2)
-              @objects[args[0] + i][args[1] + 3] << LedPanelButton.new(x + i * Game.tile_size, y + 3 * Game.tile_size, panel, i, 0)
-            end
-            (0..2).each do |j|
-              @objects[args[0] - 1][args[1] + j] << LedPanelButton.new(x - Game.tile_size, y + j * Game.tile_size, panel, j, 1)
-              @objects[args[0] + 3][args[1] + j] << LedPanelButton.new(x + 3 * Game.tile_size, y + j * Game.tile_size, panel, j, 3)
-            end
+            type = Object.const_get(data[0])
+            @objects[args[0]][args[1]] << type.new(x, y, @objects, args)
           end
           next
         end
@@ -76,19 +63,10 @@ class Screen
     (0...SCREEN_COLS).each do |i|
       (0...SCREEN_ROWS).each do |j|
         @tiles[i][j] = get_tile(tile_codes, i, j)
-        code = tile_codes[i][j]
-        obj_class = case code
-                    when /[bB]/  then Ball
-                    when 'x'     then Box
-                    when '#'     then Wall
-                    when /[k-n]/ then Key
-                    when /[K-N]/ then Door
-                    end
-        next unless obj_class
+        next unless tile_codes[i][j] == '#'
 
-        obj = obj_class.new(Game.screen_margin.x + i * Game.tile_size,
-                            Game.screen_margin.y + j * Game.tile_size, i, j, code)
-        @objects[i][j] << obj
+        @objects[i][j] << Wall.new(Game.screen_margin.x + i * Game.tile_size,
+                                   Game.screen_margin.y + j * Game.tile_size)
       end
     end
 
