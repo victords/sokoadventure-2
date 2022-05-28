@@ -10,11 +10,17 @@ class GameObject < MiniGL::GameObject
     @speed = MOVE_SPEED * Game.scale
   end
 
-  def start_move(dir, dest)
+  def start_move(dir)
     return if @moving == 1
 
+    x_var, y_var = case dir
+                   when 0 then [0, -Game.tile_size]
+                   when 1 then [Game.tile_size, 0]
+                   when 2 then [0, Game.tile_size]
+                   else        [-Game.tile_size, 0]
+                   end
+    @dest = Vector.new(@x + x_var, @y + y_var)
     @dir = dir
-    @dest = dest
     @moving = 1
   end
 
