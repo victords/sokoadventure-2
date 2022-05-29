@@ -2,10 +2,16 @@ require_relative 'objects/game_object'
 require_relative 'particles'
 
 class Man < GameObject
-  attr_reader :dir
+  OFFSET = 50
+
+  attr_reader :dir, :on_die
 
   def initialize(x, y, col, row)
-    super(x, y, :sprite_man, Vector.new(0, -50), 10, 3)
+    super(x, y, :sprite_man, Vector.new(-50, -100), 10, 3)
+    @x += OFFSET * Game.scale
+    @y += OFFSET * Game.scale
+    @w = @h = Game.tile_size - 2 * OFFSET * Game.scale
+
     @col = col
     @row = row
     @dir = 2
@@ -34,6 +40,8 @@ class Man < GameObject
                     angle: angle,
                     move: [move_x, move_y])
     end
+
+    @on_die = []
   end
 
   def animation_base
@@ -165,6 +173,19 @@ class Man < GameObject
       end
     end
 
+    (-1..1).each do |i|
+      (-1..1).each do |j|
+        col = @col + i
+        row = @row + j
+        next unless col >= 0 && row >= 0 && col < SCREEN_COLS && row < SCREEN_ROWS
+
+        if objects[col][row].any? { |o| o.is_a?(Enemy) && o.bounds.intersect?(bounds) }
+          @on_die.each(&:call)
+          return
+        end
+      end
+    end
+
     base = animation_base
     if @moving == 1
       indices = @pushing ?
@@ -172,7 +193,7 @@ class Man < GameObject
                   [base, base + 4, base + 5, base, base + 6, base + 7]
       animate(indices, 7)
       move
-      @dust.move(@x + @w / 2, @y + @h + @img_gap.y)
+      @dust.move(@x + @w / 2, @y + @h + @img_gap.y + 2 * OFFSET * Game.scale)
       if @moving == 2 && @on_move_end
         @on_move_end.call
         @on_move_end = nil
@@ -206,6 +227,10 @@ class Man < GameObject
     unless @pushing
       @sweat.each(&:stop)
     end
+  end
+
+  def base_y
+    (@y - OFFSET * Game.scale).round
   end
 
   def draw(z_index)

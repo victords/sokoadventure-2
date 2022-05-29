@@ -99,10 +99,16 @@ class Screen
     Game.stats.on_use_item << method(:on_use_item)
   end
 
-  def reset(entrance_id)
+  def reset(entrance_id = nil)
+    if entrance_id
+      @entrance_id = entrance_id
+    else
+      entrance_id = @entrance_id
+    end
     col, row, dir = @entrances[entrance_id]
     @man = Man.new(Game.screen_margin.x + col * Game.tile_size, Game.screen_margin.y + row * Game.tile_size, col, row)
     @man.set_dir(dir)
+    @man.on_die << method(:reset)
     @active = true
 
     self
@@ -226,7 +232,7 @@ class Screen
     @objects.flatten.each do |obj|
       obj.draw(10 * (((obj.y - margin.y) / Game.tile_size).ceil + 1))
     end
-    @man.draw(10 * (((@man.y - margin.y) / Game.tile_size).ceil + 1) + 9)
+    @man.draw(10 * (((@man.base_y - margin.y) / Game.tile_size).ceil + 1) + 9)
 
     @effects.each(&:draw)
 

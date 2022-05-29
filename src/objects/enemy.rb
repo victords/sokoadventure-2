@@ -3,18 +3,40 @@ require_relative 'game_object'
 class Enemy < GameObject
   SPEED = 5
 
-  def initialize(x, y, _objects, _args)
+  def initialize(x, y, objects, args)
     super(x, y, :sprite_enemy1, Vector.new(0, -40), 3, 3)
-    @dir = 1
     @speed = SPEED * Game.scale
+    @objects = objects
+    @col = args[0]
+    @row = args[1]
+    @dir = args[2] || 2
   end
 
   def update
-    prev_dir = @dir
+    prev_dir = dir = @dir
     if @moving == 1
       move
     else
-      start_move((@dir + 1) % 4)
+      step = 1
+      while step < 5
+        col, row = case dir
+                   when 0 then [@col, @row - 1]
+                   when 1 then [@col + 1, @row]
+                   when 2 then [@col, @row + 1]
+                   else        [@col - 1, @row]
+                   end
+        if col < 0 || row < 0 || col >= SCREEN_COLS || row >= SCREEN_ROWS || @objects[col][row].any?(&:blocking?)
+          dir = (dir + step) % 4 if step < 4
+          step += 1
+        else
+          start_move(dir)
+          @objects[@col][@row].delete(self)
+          @objects[col][row] << self
+          @col = col
+          @row = row
+          break
+        end
+      end
     end
 
     base = case @dir
