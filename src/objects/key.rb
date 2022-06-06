@@ -8,20 +8,20 @@ class Key < GameObject
   attr_writer :on_take
 
   def initialize(x, y, _objects, args)
-    super(x, y, :sprite_key1, Vector.new(20, -60), 7, 1)
+    super(x, y, :sprite_key1, Vector.new(10, -30), 7, 1)
     @start_y = y
     @offset = 0
     @sparkle = Particles.new(type: :sparkle,
                              x: @x + @w / 2,
                              y: @y + @img_gap.y + @h / 2,
-                             spread: 80,
+                             spread: 40,
                              duration: 30).start
-    @type = "key_#{args[2]}".to_sym
+    @type = "key_#{args[2] || 0}".to_sym
     @color = case args[2]
-             when 0 then 0xdd0000
-             when 1 then 0x1133ff
+             when 2 then 0x1133ff
              when 2 then 0xf6ca13
-             else        0x009911
+             when 3 then 0x009911
+             else        0xdd0000
              end
   end
 

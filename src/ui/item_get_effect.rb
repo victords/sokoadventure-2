@@ -10,9 +10,9 @@ class ItemGetEffect
                                y: y + Game.tile_size / 2,
                                emission_interval: 0,
                                emission_rate: 3,
-                               spread: 20,
+                               spread: 10,
                                color: ITEM_UI_ATTRS[item_type][:color]).start
-    @target = Vector.new(Game.window_size.x / 2, Game.screen_margin.x + 140 * Game.scale)
+    @target = Vector.new(Game.window_size.x / 2, Game.screen_margin.x + 70 * Game.scale)
     angle = Math.atan2(@target.y - @particles.y, @target.x - @particles.x)
     @x_ratio = Math.cos(angle)
     @y_ratio = Math.sin(angle)

@@ -2,12 +2,12 @@ require_relative 'objects/game_object'
 require_relative 'particles'
 
 class Man < GameObject
-  OFFSET = 50
+  OFFSET = 25
 
   attr_reader :dir, :on_die
 
   def initialize(x, y, col, row)
-    super(x, y, :sprite_man, Vector.new(-50, -100), 10, 3)
+    super(x, y, :sprite_man, Vector.new(-25, -50), 10, 3)
     @x += OFFSET * Game.scale
     @y += OFFSET * Game.scale
     @w = @h = Game.tile_size - 2 * OFFSET * Game.scale
@@ -21,21 +21,21 @@ class Man < GameObject
                           color: 0xdddddd,
                           emission_interval: 10,
                           duration: 30,
-                          spread: 20,
+                          spread: 10,
                           grow: 0..1,
-                          move: [0, -30])
+                          move: [0, -15])
     @sweat = (0..3).map do |dir|
       angle, move_x, move_y = case dir
-                              when 0 then [0, -5..5, 20..40]
-                              when 1 then [120, -40..-20, -5..5]
-                              when 2 then [180, -5..5, -40..-20]
-                              else        [240, 20..40, -5..5]
+                              when 0 then [0, -3..3, 10..20]
+                              when 1 then [120, -20..-10, -3..3]
+                              when 2 then [180, -3..3, -20..-10]
+                              else        [240, 10..20, -3..3]
                               end
       Particles.new(type: :drop,
                     color: 0x99ddff,
                     emission_interval: 5..20,
                     duration: 40,
-                    spread: 40,
+                    spread: 20,
                     grow: 0.5..1,
                     angle: angle,
                     move: [move_x, move_y])
@@ -188,9 +188,11 @@ class Man < GameObject
 
     base = animation_base
     if @moving == 1
-      indices = @pushing ?
-                  [base + 8, base + 9] :
+      indices = if @pushing
+                  [base + 8, base + 9]
+                else
                   [base, base + 4, base + 5, base, base + 6, base + 7]
+                end
       animate(indices, 7)
       move
       @dust.move(@x + @w / 2, @y + @h + @img_gap.y + 2 * OFFSET * Game.scale)

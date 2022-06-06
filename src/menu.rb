@@ -3,6 +3,7 @@ class Menu
 
   def initialize
     @active = true
+    @font = TextHelper.new(Res.font(:font, 160), 0, Game.scale, Game.scale)
   end
 
   def clear_effects; end
@@ -15,7 +16,7 @@ class Menu
 
   def draw
     G.window.clear(0xabcdef)
-    Game.font.write_line('SokoAdventure 2', Game.window_size.x / 2, Game.window_size.y / 2 - 2 * Game.scale * 96,
-                         :center, 0xffffff, 255, :border, 0, 4 * Game.scale, 255, 0, 4 * Game.scale, 4 * Game.scale)
+    @font.write_line('SokoAdventure 2', Game.window_size.x / 2, Game.window_size.y / 2 - Game.scale * 80,
+                     :center, 0xffffff, 255, :border, 0, 2 * Game.scale, 255, 0, Game.scale, Game.scale)
   end
 end

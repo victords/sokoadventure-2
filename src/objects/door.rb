@@ -2,7 +2,7 @@ require_relative 'game_object'
 
 class Door < GameObject
   def initialize(x, y, _objects, args)
-    super(x, y, :sprite_door1, Vector.new(-20, -28), 3, 2)
+    super(x, y, :sprite_door1, Vector.new(-10, -14), 3, 2)
     @key_type = "key_#{args[2]}".to_sym
     @color = case args[2]
              when 0 then 0xdd0000

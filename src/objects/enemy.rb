@@ -1,10 +1,10 @@
 require_relative 'game_object'
 
 class Enemy < GameObject
-  SPEED = 5
+  SPEED = 2.5
 
   def initialize(x, y, objects, args)
-    super(x, y, :sprite_enemy1, Vector.new(0, -40), 3, 3)
+    super(x, y, :sprite_enemy1, Vector.new(0, -20), 3, 3)
     @speed = SPEED * Game.scale
     @objects = objects
     @col = args[0]

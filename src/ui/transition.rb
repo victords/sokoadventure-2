@@ -11,19 +11,19 @@ class Transition
       when :squares then [60, 120]
       else               [30, 60]
       end
-    
+
     if @type == :squares
-      @square_size = 80 * Game.scale
+      @square_size = 40 * Game.scale
       @cols = (Game.window_size.x.to_f / @square_size).ceil
       @rows = (Game.window_size.y.to_f / @square_size).ceil
       @slope = (@half_duration + @cols + @rows).to_f / @half_duration
     end
   end
-  
+
   def dead?
     @timer >= @full_duration
   end
-  
+
   def update
     @timer += 1
     if @timer == @half_duration
@@ -32,7 +32,7 @@ class Transition
       @on_end&.call
     end
   end
-  
+
   def draw
     case @type
     when :fade

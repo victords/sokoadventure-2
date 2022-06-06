@@ -30,9 +30,9 @@ class ItemPanel
   def update
     case @state
     when 0
-      @y += 10 * Game.scale
-      if @y >= Game.screen_margin.y + 20 * Game.scale
-        @y = Game.screen_margin.y + 20 * Game.scale
+      @y += 5 * Game.scale
+      if @y >= Game.screen_margin.y + 10 * Game.scale
+        @y = Game.screen_margin.y + 10 * Game.scale
         @state = 1
       end
     when 1
@@ -50,7 +50,7 @@ class ItemPanel
 
   def draw
     @img.draw(@x, @y, UI_Z_INDEX, Game.scale, Game.scale, (@alpha << 24) | 0xffffff)
-    @icon.draw(@x + 40 * Game.scale, @y + 40 * Game.scale, UI_Z_INDEX, Game.scale, Game.scale, (@alpha << 24) | @icon_color)
-    Game.font.write_line((Game.stats.items[@item_type] || 0).to_s, @x + (@img.width - 40) * Game.scale, @y + 52 * Game.scale, :right, 0xffffff, @alpha, nil, 0, 0, 0, UI_Z_INDEX)
+    @icon.draw(@x + 20 * Game.scale, @y + 20 * Game.scale, UI_Z_INDEX, Game.scale, Game.scale, (@alpha << 24) | @icon_color)
+    Game.font.write_line((Game.stats.items[@item_type] || 0).to_s, @x + (@img.width - 20) * Game.scale, @y + 26 * Game.scale, :right, 0xffffff, @alpha, nil, 0, 0, 0, UI_Z_INDEX)
   end
 end

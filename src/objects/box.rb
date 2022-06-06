@@ -5,14 +5,14 @@ class Box < GameObject
   attr_reader :falling, :fallen
 
   def initialize(x, y, _objects, _args)
-    super(x, y, :sprite_box1, Vector.new(0, -80), 7, 3)
+    super(x, y, :sprite_box1, Vector.new(0, -40), 7, 3)
     @dust = (0..3).map do |_|
       Particles.new(type: :dust,
                     color: 0xdddddd,
                     emission_interval: 0,
                     duration: 90,
                     alpha_inflection: 0.1,
-                    move: [0, -30])
+                    move: [0, -15])
     end
   end
 

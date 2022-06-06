@@ -31,7 +31,8 @@ class Game
     end
 
     def start
-      @font = TextHelper.new(Res.font(:font, 96), 0, @scale, @scale)
+      puts "scale: #{@scale}"
+      @font = TextHelper.new(Res.font(:font, 48), 0, @scale, @scale)
 
       @controller = Menu.new
     end
