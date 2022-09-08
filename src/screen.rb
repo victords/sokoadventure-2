@@ -63,10 +63,14 @@ class Screen
     (0...SCREEN_COLS).each do |i|
       (0...SCREEN_ROWS).each do |j|
         @tiles[i][j] = get_tile(tile_codes, i, j)
-        next unless tile_codes[i][j] == '#'
-
-        @objects[i][j] << Wall.new(Game.screen_margin.x + i * Game.tile_size,
-                                   Game.screen_margin.y + j * Game.tile_size)
+        if tile_codes[i][j] == '#'
+          @objects[i][j] << Wall.new(Game.screen_margin.x + i * Game.tile_size,
+                                     Game.screen_margin.y + j * Game.tile_size)
+        elsif /[bB]/ =~ tile_codes[i][j]
+          @objects[i][j] << Ball.new(Game.screen_margin.x + i * Game.tile_size,
+                                     Game.screen_margin.y + j * Game.tile_size,
+                                     tile_codes[i][j] == 'B')
+        end
       end
     end
 

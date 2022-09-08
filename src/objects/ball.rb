@@ -1,9 +1,9 @@
 require_relative 'game_object'
 
 class Ball < GameObject
-  def initialize(x, y, _objects, args)
+  def initialize(x, y, set)
     super(x, y, :sprite_ball1, Vector.new(0, -40), 2, 1)
-    @set = !args[2].nil?
+    @set = set
     @glow_alpha = 0
   end
 
